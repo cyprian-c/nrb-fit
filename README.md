@@ -22,4 +22,4 @@ NRBFIT is a responsive, single-page website for a neighborhood fitness studio. I
 
 ## Run Locally
 
-Open `index.html` in a browser. The coach portraits are stored in `nrbfit-site/assets/`. Google Fonts and the hero image are loaded from external sources and require an internet connection.
+Open `index.html` in a browser. The coach portraits are stored in `assets/`. Google Fonts and the hero image are loaded from external sources and require an internet connection.
