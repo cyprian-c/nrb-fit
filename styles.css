@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
 
+
 :root {
   color-scheme: light;
   --color-white: #fff;
@@ -11,6 +12,7 @@
   --font-body: 'DM Sans', sans-serif;
 }
 
+/* global box-sizing reset to keep spacing predictable across components */
 *,
 *::before,
 *::after {
@@ -45,6 +47,7 @@ a {
   text-decoration: none;
 }
 
+/* Flexbox is used for linear page structures like the header and hero actions */
 .site-header {
   min-height: 76px;
   padding: 0 7.2%;
@@ -114,6 +117,7 @@ a {
   font-size: 11px;
 }
 
+/* hero section uses flexible layout rules and responsive stacking on small screens */
 .hero {
   min-height: 560px;
   padding: 70px 7.2% 60px;
@@ -319,6 +323,7 @@ p {
   margin-left: 12px;
 }
 
+/* CSS Grid manages the class schedule and keeps timetable content aligned */
 .schedule {
   width: 100%;
   border-top: 1px solid var(--color-black);
@@ -438,6 +443,7 @@ p {
   text-align: right;
 }
 
+/*  responsive card grid for coach profiles and pricing tiers */
 .coach-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -821,6 +827,7 @@ p {
   line-height: 1.6;
 }
 
+/* breakpoints adapt layout and content for tablet-sized screens */
 @media (max-width: 850px) {
   .site-header {
     padding-right: 5%;
@@ -856,6 +863,7 @@ p {
   }
 }
 
+/* mobile breakpoint collapses navigation, stacks sections, and prevents horizontal scrolling */
 @media (max-width: 640px) {
   html {
     scroll-padding-top: 68px;
@@ -1058,6 +1066,7 @@ p {
   }
 }
 
+/* accessibility support for reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
