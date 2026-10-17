@@ -42,3 +42,10 @@ img {
 a {
   text-decoration: none;
 }
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}

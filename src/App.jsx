@@ -4,10 +4,11 @@ import ClassScheduleSection from './components/ClassScheduleSection'
 import CoachSection from './components/CoachSection'
 import MembershipSection from './components/MembershipSection'
 import ContactSection from './components/ContactSection'
+import Footer from './components/Footer'
 
 function App() {
   return (
-    <div className="min-h-screen bg-white text-[#10110f] antialiased">
+    <div className="min-h-screen overflow-x-hidden bg-white text-[#10110f] antialiased">
       <Header />
 
       <main id="top">
@@ -19,6 +20,8 @@ function App() {
         </div>
         <ContactSection />
       </main>
+
+      <Footer />
     </div>
   )
 }
