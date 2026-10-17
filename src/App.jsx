@@ -2,6 +2,7 @@ import Header from './components/Header'
 import Hero from './components/Hero'
 import ClassScheduleSection from './components/ClassScheduleSection'
 import CoachSection from './components/CoachSection'
+import MembershipSection from './components/MembershipSection'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Hero />
         <ClassScheduleSection />
         <CoachSection />
+        <MembershipSection />
       </main>
     </div>
   )
