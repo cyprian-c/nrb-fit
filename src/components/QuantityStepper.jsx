@@ -1,22 +1,13 @@
-import { useState } from 'react'
-
-// QuantityStepper: a small controlled component reused per item following the parent-owned state pattern.
-export default function QuantityStepper({ defaultValue = 1, min = 0, max = 10 }) {
-  const [value, setValue] = useState(defaultValue)
-
-  const handleChange = (nextValue) => {
-    if (nextValue < min) return
-    if (nextValue > max) return
-    setValue(nextValue)
-  }
-
+// QuantityStepper: renders parent-owned quantity state and reports bounded updates through onChange.
+export default function QuantityStepper({ label, value, onChange, min = 0, max = 10 }) {
   return (
     <div className="flex items-center justify-between gap-3 border border-[#dfe1d9] bg-white">
       <button
         type="button"
-        onClick={() => handleChange(value - 1)}
-        className="flex h-9 w-9 items-center justify-center text-lg text-[#10110f] transition hover:bg-[#f6f7f3]"
-        aria-label="Decrease quantity"
+        onClick={() => onChange(value - 1)}
+        disabled={value <= min}
+        className="flex h-9 w-9 items-center justify-center text-lg text-[#10110f] transition hover:bg-[#f6f7f3] disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label={`Decrease ${label} quantity`}
       >
         −
       </button>
@@ -25,9 +16,10 @@ export default function QuantityStepper({ defaultValue = 1, min = 0, max = 10 })
 
       <button
         type="button"
-        onClick={() => handleChange(value + 1)}
-        className="flex h-9 w-9 items-center justify-center text-lg text-[#10110f] transition hover:bg-[#f6f7f3]"
-        aria-label="Increase quantity"
+        onClick={() => onChange(value + 1)}
+        disabled={value >= max}
+        className="flex h-9 w-9 items-center justify-center text-lg text-[#10110f] transition hover:bg-[#f6f7f3] disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label={`Increase ${label} quantity`}
       >
         +
       </button>

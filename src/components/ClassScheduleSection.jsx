@@ -60,27 +60,27 @@ export default function ClassScheduleSection() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-none border border-[#e4e5df] bg-white">
-          <div className="grid grid-cols-[0.8fr_1.8fr_1.6fr_0.7fr] items-center border-b border-[#e4e5df] bg-[#f8f8f5] px-4 py-3 text-[9px] font-bold uppercase tracking-[0.12em] text-[#777a73]">
+          <div className="grid grid-cols-[0.65fr_minmax(0,1.8fr)_0.65fr] items-center gap-2 border-b border-[#e4e5df] bg-[#f8f8f5] px-3 py-3 text-[9px] font-bold uppercase tracking-[0.12em] text-[#777a73] sm:grid-cols-[0.8fr_1.8fr_1.6fr_0.7fr] sm:gap-3 sm:px-4">
             <span>Time</span>
             <span>Session</span>
-            <span>Focus</span>
+            <span className="hidden sm:block">Focus</span>
             <span>Duration</span>
           </div>
 
           {filteredClasses.map((item) => (
             <div
               key={`${item.time}-${item.name}`}
-              className="grid grid-cols-[0.8fr_1.8fr_1.6fr_0.7fr] items-center gap-3 border-b border-[#e4e5df] px-4 py-4 text-[11px] text-[#10110f] last:border-b-0"
+              className="grid grid-cols-[0.65fr_minmax(0,1.8fr)_0.65fr] items-center gap-2 border-b border-[#e4e5df] px-3 py-4 text-[10px] text-[#10110f] last:border-b-0 sm:grid-cols-[0.8fr_1.8fr_1.6fr_0.7fr] sm:gap-3 sm:px-4 sm:text-[11px]"
             >
               <span className="font-bold">{item.time}</span>
-              <span className="font-bold">
+              <span className="min-w-0 font-bold">
                 {item.name}
-                <span className="ml-2 inline-block rounded bg-[#f1f2ed] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-[#10110f]">
+                <span className="mt-1 inline-block rounded bg-[#f1f2ed] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-[#10110f] sm:ml-2 sm:mt-0">
                   {item.category}
                 </span>
               </span>
-              <span className="text-[#555750]">{item.focus}</span>
-              <span>{item.duration}</span>
+              <span className="hidden text-[#555750] sm:block">{item.focus}</span>
+              <span className="whitespace-nowrap">{item.duration}</span>
             </div>
           ))}
         </div>

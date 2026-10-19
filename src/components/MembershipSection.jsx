@@ -1,8 +1,17 @@
+import { useState } from 'react'
 import { membershipPlans } from '../data/siteData'
 import QuantityStepper from './QuantityStepper'
 
 // MembershipSection: shows the studio pricing and includes a reusable stepper used on each item card.
 export default function MembershipSection() {
+  const [quantities, setQuantities] = useState(() =>
+    Object.fromEntries(membershipPlans.map((plan) => [plan.label, 1])),
+  )
+
+  const updateQuantity = (label, value) => {
+    setQuantities((current) => ({ ...current, [label]: value }))
+  }
+
   return (
     <section id="memberships" className="py-16 sm:py-20" aria-labelledby="memberships-title">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -59,7 +68,13 @@ export default function MembershipSection() {
             </ul>
 
             <div className="mt-auto pt-5">
-              <QuantityStepper defaultValue={1} min={0} max={9} />
+              <QuantityStepper
+                label={plan.label}
+                value={quantities[plan.label]}
+                onChange={(value) => updateQuantity(plan.label, value)}
+                min={0}
+                max={9}
+              />
             </div>
           </article>
         ))}
