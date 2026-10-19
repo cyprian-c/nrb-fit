@@ -1,3 +1,5 @@
+import studioImage from '../../assets/studio-hero.jpg'
+
 // Hero: keeps the original marketing message, proof stats, and CTA structure while using local studio imagery.
 export default function Hero() {
   const stats = [
@@ -51,7 +53,14 @@ export default function Hero() {
       </div>
 
       <div className="relative min-h-[380px] overflow-hidden bg-[#f1f2ed] sm:min-h-[440px]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,0,0,0.16),_transparent_60%)]" aria-hidden="true" />
+        <img
+          src={studioImage}
+          alt="Strength training studio with free weights and equipment"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#10110f]/35 via-transparent to-transparent" aria-hidden="true" />
         <div className="absolute right-4 top-5 flex h-24 w-24 flex-col justify-between bg-[#c8f31d] p-3 text-[11px] font-extrabold uppercase leading-[1.05] text-[#10110f]">
           <span>Move<br />your<br />way</span>
           <span className="self-end text-2xl" aria-hidden="true">✳</span>

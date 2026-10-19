@@ -27,7 +27,9 @@ export default function CoachSection() {
                 <img
                   src={coach.image}
                   alt={`${coach.name}, ${coach.specialty}`}
-                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover object-center"
                 />
                 <span className="absolute bottom-0 right-0 bg-[#c8f31d] px-3 py-2 font-[Barlow_Condensed] text-lg font-bold text-[#10110f]">
                   {String(index + 1).padStart(2, '0')}

@@ -1,3 +1,7 @@
+import ninaPortrait from '../../assets/nina-kim-coach.webp'
+import maePortrait from '../../assets/mae-rivera-coach.webp'
+import andrePortrait from '../../assets/andre-miles-coach.webp'
+
 export const classSchedule = [
   {
     time: '05:45',
@@ -76,19 +80,19 @@ export const coachProfiles = [
     name: 'Nina Kim',
     specialty: 'Strength & Conditioning',
     bio: 'Coaching focus: progressive strength, movement technique and small-group conditioning. Professional highlight: builds structured programmes that help members track and develop strength over time.',
-    image: '/assets/nina-kim-coach.jpg',
+    image: ninaPortrait,
   },
   {
     name: 'Mae Rivera',
     specialty: 'Pilates & Mobility',
     bio: 'Coaching focus: Pilates-based core training, mobility and recovery. Professional highlight: leads accessible movement sessions that build control, stability and confidence across experience levels.',
-    image: '/assets/mae-rivera-coach.jpg',
+    image: maePortrait,
   },
   {
     name: 'Andre Miles',
     specialty: 'Ride & Run Club',
     bio: 'Coaching focus: run-club programming, endurance conditioning and indoor cycling. Professional highlight: plans progressive sessions for a range of paces, with an emphasis on consistency and race-day preparation.',
-    image: '/assets/andre-miles-coach.jpg',
+    image: andrePortrait,
   },
 ]
 

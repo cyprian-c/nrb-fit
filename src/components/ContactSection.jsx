@@ -42,8 +42,8 @@ export default function ContactSection() {
           <label htmlFor="interest" className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
             What can we help with?
           </label>
-          <select id="interest" name="interest" className="min-h-[46px] border border-[#d8dad2] bg-white px-3 text-sm text-[#10110f] outline-none focus:ring-2 focus:ring-[#84ae00]" required>
-            <option value="" disabled selected>Select an enquiry</option>
+          <select id="interest" name="interest" defaultValue="" className="min-h-[46px] border border-[#d8dad2] bg-white px-3 text-sm text-[#10110f] outline-none focus:ring-2 focus:ring-[#84ae00]" required>
+            <option value="" disabled>Select an enquiry</option>
             <option>Class booking</option>
             <option>Independent gym access</option>
             <option>Membership or class pack</option>
