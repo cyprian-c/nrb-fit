@@ -1,5 +1,5 @@
 {
-  "name": "nrb-fit",
+  "name": "nrbfit-client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,9 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "tasks": "node scripts/task-status.js",
-    "tasks:sync": "node scripts/task-status.js --sync"
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^19.2.8",
