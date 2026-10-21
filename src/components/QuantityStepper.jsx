@@ -6,7 +6,7 @@ export default function QuantityStepper({ label, value, onChange, min = 0, max =
         type="button"
         onClick={() => onChange(value - 1)}
         disabled={value <= min}
-        className="flex h-9 w-9 items-center justify-center text-lg text-[#10110f] transition hover:bg-[#f6f7f3] disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex h-9 w-9 cursor-pointer items-center justify-center text-lg text-[#10110f] transition hover:bg-[#f6f7f3] disabled:cursor-not-allowed disabled:opacity-40"
         aria-label={`Decrease ${label} quantity`}
       >
         −
@@ -18,7 +18,7 @@ export default function QuantityStepper({ label, value, onChange, min = 0, max =
         type="button"
         onClick={() => onChange(value + 1)}
         disabled={value >= max}
-        className="flex h-9 w-9 items-center justify-center text-lg text-[#10110f] transition hover:bg-[#f6f7f3] disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex h-9 w-9 cursor-pointer items-center justify-center text-lg text-[#10110f] transition hover:bg-[#f6f7f3] disabled:cursor-not-allowed disabled:opacity-40"
         aria-label={`Increase ${label} quantity`}
       >
         +

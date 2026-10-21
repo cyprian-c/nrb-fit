@@ -42,7 +42,7 @@ export default function ClassScheduleSection() {
               aria-pressed={isActive}
               onClick={() => setSelectedCategory(category)}
               className={[
-                'inline-flex items-center justify-center border px-3 py-2 text-[9px] font-bold uppercase tracking-[0.14em] transition',
+                'inline-flex cursor-pointer items-center justify-center border px-3 py-2 text-[9px] font-bold uppercase tracking-[0.14em] transition',
                 isActive
                   ? 'border-[#10110f] bg-[#10110f] text-white'
                   : 'border-[#dfe1d9] bg-white text-[#10110f] hover:border-[#10110f]',
