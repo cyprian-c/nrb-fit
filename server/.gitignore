@@ -1,0 +1,8 @@
+# Server Environment & Secrets (Never commit secrets to git)
+.env
+.env.*
+*.local
+!.env.example
+
+# Dependencies
+node_modules/
