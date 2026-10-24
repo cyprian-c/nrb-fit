@@ -187,3 +187,13 @@ export async function getCurrentUser(request, response, next) {
     next(error)
   }
 }
+
+// Remove the browser session without requiring a valid token first.
+export function logout(request, response) {
+  response.clearCookie(sessionCookieName, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+  })
+  response.json({ message: 'Logged out successfully' })
+}
