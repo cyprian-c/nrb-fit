@@ -58,8 +58,8 @@ async function seed() {
     for (const coach of coaches) {
       await client.query(
         `INSERT INTO coaches (name, specialty, bio, image_url)
-         SELECT $1, $2, $3, $4
-         WHERE NOT EXISTS (SELECT 1 FROM coaches WHERE name = $1)`,
+         SELECT $1::varchar, $2::varchar, $3::text, $4::varchar
+         WHERE NOT EXISTS (SELECT 1 FROM coaches WHERE name = $1::varchar)`,
         [coach.name, coach.specialty, coach.bio, coach.imageUrl],
       )
     }
@@ -68,10 +68,10 @@ async function seed() {
       const [time, name, category, focus, duration, coachName] = classRecord
       await client.query(
         `INSERT INTO classes (time, name, category, focus, duration, coach_id)
-         SELECT $1, $2, $3, $4, $5, coaches.id
+         SELECT $1::varchar, $2::varchar, $3::varchar, $4::varchar, $5::varchar, coaches.id
          FROM coaches
-         WHERE coaches.name = $6
-           AND NOT EXISTS (SELECT 1 FROM classes WHERE name = $2)`,
+         WHERE coaches.name = $6::varchar
+           AND NOT EXISTS (SELECT 1 FROM classes WHERE name = $2::varchar)`,
         [time, name, category, focus, duration, coachName],
       )
     }
@@ -80,8 +80,8 @@ async function seed() {
       const [label, title, price, suffix, description, perks, featured] = membership
       await client.query(
         `INSERT INTO memberships (label, title, price, suffix, description, perks, featured)
-         SELECT $1, $2, $3, $4, $5, $6::jsonb, $7
-         WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE label = $1)`,
+         SELECT $1::varchar, $2::varchar, $3::varchar, $4::varchar, $5::text, $6::jsonb, $7::boolean
+         WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE label = $1::varchar)`,
         [label, title, price, suffix, description, JSON.stringify(perks), featured],
       )
     }

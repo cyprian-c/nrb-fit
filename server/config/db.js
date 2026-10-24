@@ -1,11 +1,18 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
+import { neon } from '@neondatabase/serverless'
 import pg from 'pg'
+
+// Local development may keep the shared workspace .env at the repository root,
+// while deployed environments provide DATABASE_URL directly at process level.
+dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '../.env' })
 
 const { Pool } = pg
 const databaseUrl = process.env.DATABASE_URL
+const sql = databaseUrl ? neon(databaseUrl) : null
 
-// Reuse a small set of connections through Neon's pooled endpoint instead of
-// opening a new PostgreSQL connection for every request.
+// Keep pg available for migration and seed scripts, which need interactive
+// transactions. Request handlers use the HTTP driver below and do not hold a
+// WebSocket connection open for each serverless request.
 export const pool = new Pool({
   connectionString: databaseUrl,
   ssl: { rejectUnauthorized: false },
@@ -15,19 +22,19 @@ export const pool = new Pool({
   allowExitOnIdle: true,
 })
 
-// Serverless processes and Neon can suspend while idle, so idle connections
-// are released quickly and connection attempts fail instead of hanging.
+// Execute one parameterized HTTP query at a time and return a pg-shaped result
+// so existing controllers do not need to know which Neon transport is used.
 export async function query(text, params = []) {
-  if (!databaseUrl) {
+  if (!sql) {
     throw new Error('DATABASE_URL must be set before running database queries.')
   }
 
   const startedAt = Date.now()
 
   try {
-    const result = await pool.query(text, params)
+    const rows = await sql.query(text, params)
     console.info(`[db] Query completed in ${Date.now() - startedAt}ms`)
-    return result
+    return { rows, rowCount: rows.length }
   } catch (error) {
     console.error(`[db] Query failed after ${Date.now() - startedAt}ms`)
     throw error

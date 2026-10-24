@@ -1,8 +1,13 @@
-import 'dotenv/config'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import dotenv from 'dotenv'
 import express from 'express'
+import classRoutes from './routes/classRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
+
+// In local development the workspace keeps its real .env at the repository
+// root. Deployed environments already expose process variables directly.
+dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '../.env' })
 
 const app = express()
 const port = Number(process.env.PORT) || 5000
@@ -34,6 +39,9 @@ app.get('/api/health', (request, response) => {
     environment: process.env.NODE_ENV || 'development',
   })
 })
+
+// Public studio data routes are mounted before the final error handler.
+app.use('/api/classes', classRoutes)
 
 // Keep error handling last so it receives failures from every route above.
 app.use(errorHandler)

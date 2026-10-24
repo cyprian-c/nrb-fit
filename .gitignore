@@ -1,8 +1,10 @@
 # Environment & Secrets (Never commit secrets to git)
+node_modules/
 .env
 .env.*
 *.local
 !.env.example
+dist/
 
 # Documentation & AI Context (Excluded from git tracking as requested)
 context/
