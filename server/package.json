@@ -4,8 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prestart": "node ../scripts/check-no-typescript.js",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "predev": "node ../scripts/check-no-typescript.js",
+    "dev": "nodemon index.js",
+    "premigrate": "node ../scripts/check-no-typescript.js",
+    "migrate": "node scripts/migrate.js",
+    "preseed": "node ../scripts/check-no-typescript.js",
+    "seed": "node scripts/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

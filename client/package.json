@@ -4,9 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node ../scripts/check-no-typescript.js",
     "dev": "vite",
+    "prebuild": "node ../scripts/check-no-typescript.js",
     "build": "vite build",
+    "prelint": "node ../scripts/check-no-typescript.js",
     "lint": "eslint .",
+    "prepreview": "node ../scripts/check-no-typescript.js",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,8 +20,6 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",

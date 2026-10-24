@@ -5,9 +5,18 @@
   "scripts": {
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
+    "build": "npm run build:client",
     "build:client": "cd client && npm run build",
+    "lint": "npm run lint:client",
     "lint:client": "cd client && npm run lint",
+    "check:javascript": "node scripts/check-no-typescript.js",
+    "neon:plan": "npm run check:javascript && neon config plan --config neon.js",
+    "neon:deploy": "npm run check:javascript && neon deploy --config neon.js",
     "tasks": "node scripts/task-status.js",
     "tasks:sync": "node scripts/task-status.js --sync"
+  },
+  "dependencies": {
+    "@neon/config": "^1.9.3",
+    "@neon/env": "^1.6.4"
   }
 }
