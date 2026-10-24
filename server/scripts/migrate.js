@@ -59,8 +59,12 @@ const schemaSql = `
     email VARCHAR(255) NOT NULL,
     interest VARCHAR(100) NOT NULL,
     message TEXT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'new',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
+
+  ALTER TABLE enquiries
+    ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'new';
 `
 
 async function migrate() {

@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import classRoutes from './routes/classRoutes.js'
 import coachRoutes from './routes/coachRoutes.js'
+import enquiryRoutes from './routes/enquiryRoutes.js'
 import membershipRoutes from './routes/membershipRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
@@ -46,6 +47,7 @@ app.get('/api/health', (request, response) => {
 app.use('/api/classes', classRoutes)
 app.use('/api/coaches', coachRoutes)
 app.use('/api/memberships', membershipRoutes)
+app.use('/api/enquiries', enquiryRoutes)
 
 // Keep error handling last so it receives failures from every route above.
 app.use(errorHandler)
