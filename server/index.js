@@ -1,0 +1,45 @@
+import 'dotenv/config'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import express from 'express'
+import { errorHandler } from './middleware/errorHandler.js'
+
+const app = express()
+const port = Number(process.env.PORT) || 5000
+const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173'
+
+// Allow the browser client to send JSON requests and session cookies while
+// still keeping the allowed frontend origin explicit for cross-origin calls.
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin === clientUrl) {
+      callback(null, true)
+      return
+    }
+
+    callback(new Error('The request origin is not allowed by the API.'))
+  },
+  credentials: true,
+}))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
+
+// A lightweight endpoint for deployment checks and uptime monitors. It does
+// not query the database, so infrastructure can verify the process separately.
+app.get('/api/health', (request, response) => {
+  response.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+  })
+})
+
+// Keep error handling last so it receives failures from every route above.
+app.use(errorHandler)
+
+app.listen(port, () => {
+  console.info(`[server] NRBFIT API listening on port ${port}`)
+})
+
+export { app }
