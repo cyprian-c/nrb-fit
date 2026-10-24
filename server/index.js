@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
 import authRoutes from './routes/authRoutes.js'
+import bookingRoutes from './routes/bookingRoutes.js'
 import classRoutes from './routes/classRoutes.js'
 import coachRoutes from './routes/coachRoutes.js'
 import enquiryRoutes from './routes/enquiryRoutes.js'
@@ -49,6 +50,7 @@ app.get('/api/health', (request, response) => {
 
 // Public studio data routes are mounted before the final error handler.
 app.use('/api/auth', authRoutes)
+app.use('/api/bookings', bookingRoutes)
 app.use('/api/classes', classRoutes)
 app.use('/api/coaches', coachRoutes)
 app.use('/api/memberships', membershipRoutes)
