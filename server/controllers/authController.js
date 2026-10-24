@@ -15,6 +15,19 @@ function setSessionCookie(response, token) {
   })
 }
 
+function getSessionToken(request) {
+  if (request.cookies?.[sessionCookieName]) {
+    return request.cookies[sessionCookieName]
+  }
+
+  const authorization = request.get('authorization')
+  if (authorization?.startsWith('Bearer ')) {
+    return authorization.slice('Bearer '.length).trim()
+  }
+
+  return null
+}
+
 // Register a member, create a server-side password hash, and start a session.
 export async function signup(request, response, next) {
   const body = request.body || {}
@@ -135,6 +148,42 @@ export async function login(request, response, next) {
       },
     })
   } catch (error) {
+    next(error)
+  }
+}
+
+// Restore the current session from the cookie or an Authorization bearer token.
+export async function getCurrentUser(request, response, next) {
+  const token = getSessionToken(request)
+
+  if (!token || !process.env.JWT_SECRET) {
+    response.status(401).json({ error: 'Authentication required.' })
+    return
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET)
+    const result = await query(
+      `SELECT id, full_name, email, role
+       FROM users
+       WHERE id = $1
+       LIMIT 1`,
+      [payload.id],
+    )
+    const user = result.rows[0]
+
+    if (!user) {
+      response.status(401).json({ error: 'Session is no longer valid.' })
+      return
+    }
+
+    response.json({ user })
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      response.status(401).json({ error: 'Session is invalid or expired.' })
+      return
+    }
+
     next(error)
   }
 }
