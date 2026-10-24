@@ -15,13 +15,16 @@ dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '../.env' })
 
 const app = express()
 const port = Number(process.env.PORT) || 5000
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173'
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
 
 // Allow the browser client to send JSON requests and session cookies while
 // still keeping the allowed frontend origin explicit for cross-origin calls.
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || origin === clientUrl) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true)
       return
     }
@@ -54,7 +57,7 @@ app.use('/api/enquiries', enquiryRoutes)
 // Keep error handling last so it receives failures from every route above.
 app.use(errorHandler)
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.info(`[server] NRBFIT API listening on port ${port}`)
 })
 
