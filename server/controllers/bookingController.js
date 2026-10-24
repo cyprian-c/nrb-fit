@@ -85,3 +85,34 @@ export async function createBooking(request, response, next) {
     next(error)
   }
 }
+
+export async function getMyBookings(request, response, next) {
+  try {
+    const result = await query(
+      `SELECT
+         bookings.id,
+         bookings.user_id,
+         bookings.class_id,
+         bookings.booking_date,
+         bookings.status,
+         bookings.created_at,
+         classes.time,
+         classes.name AS class_name,
+         classes.category,
+         classes.focus,
+         classes.duration,
+         coaches.name AS coach_name,
+         coaches.specialty AS coach_specialty
+       FROM bookings
+       JOIN classes ON classes.id = bookings.class_id
+       LEFT JOIN coaches ON coaches.id = classes.coach_id
+       WHERE bookings.user_id = $1
+       ORDER BY bookings.booking_date DESC, classes.time ASC, bookings.created_at DESC`,
+      [request.user.id],
+    )
+
+    response.json({ bookings: result.rows })
+  } catch (error) {
+    next(error)
+  }
+}
