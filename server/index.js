@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
 import classRoutes from './routes/classRoutes.js'
+import coachRoutes from './routes/coachRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 // In local development the workspace keeps its real .env at the repository
@@ -42,6 +43,7 @@ app.get('/api/health', (request, response) => {
 
 // Public studio data routes are mounted before the final error handler.
 app.use('/api/classes', classRoutes)
+app.use('/api/coaches', coachRoutes)
 
 // Keep error handling last so it receives failures from every route above.
 app.use(errorHandler)
