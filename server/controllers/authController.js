@@ -84,3 +84,57 @@ export async function signup(request, response, next) {
     next(error)
   }
 }
+
+// Verify member credentials and replace any existing session with a fresh token.
+export async function login(request, response, next) {
+  const body = request.body || {}
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+  const password = typeof body.password === 'string' ? body.password : ''
+
+  if (!email || !password) {
+    response.status(400).json({ error: 'Email and password are required.' })
+    return
+  }
+
+  if (!process.env.JWT_SECRET) {
+    next(new Error('JWT_SECRET must be configured before creating sessions.'))
+    return
+  }
+
+  try {
+    const result = await query(
+      `SELECT id, full_name, email, role, password_hash
+       FROM users
+       WHERE email = $1
+       LIMIT 1`,
+      [email],
+    )
+    const user = result.rows[0]
+    const passwordMatches = user
+      ? await bcrypt.compare(password, user.password_hash)
+      : false
+
+    if (!user || !passwordMatches) {
+      response.status(401).json({ error: 'Invalid email or password.' })
+      return
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, full_name: user.full_name, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' },
+    )
+
+    setSessionCookie(response, token)
+    response.json({
+      user: {
+        id: user.id,
+        full_name: user.full_name,
+        email: user.email,
+        role: user.role,
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
+}
