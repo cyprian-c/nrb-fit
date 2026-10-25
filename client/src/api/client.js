@@ -1,4 +1,8 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? 'https://nrbfit-api.onrender.com/api'
+    : 'http://localhost:5000/api')
 
 // Keep API failures as normal Error objects so callers can show the server's
 // validation message without needing to know about the fetch response shape.

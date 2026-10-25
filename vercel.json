@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm run build:client",
   "outputDirectory": "client/dist",
-  "installCommand": "npm install",
+  "installCommand": "npm install --prefix client",
   "cleanUrls": true,
   "rewrites": [
     {

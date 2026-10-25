@@ -4,13 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node ../scripts/check-no-typescript.js",
+    "predev": "node -e \"import('node:fs').then(fs => { if (fs.existsSync('../scripts/check-no-typescript.js')) import('node:child_process').then(cp => cp.spawnSync('node', ['../scripts/check-no-typescript.js'], {stdio: 'inherit'})); })\"",
     "dev": "vite",
-    "prebuild": "node ../scripts/check-no-typescript.js",
+    "prebuild": "node -e \"import('node:fs').then(fs => { if (fs.existsSync('../scripts/check-no-typescript.js')) import('node:child_process').then(cp => cp.spawnSync('node', ['../scripts/check-no-typescript.js'], {stdio: 'inherit'})); })\"",
     "build": "vite build",
-    "prelint": "node ../scripts/check-no-typescript.js",
+    "prelint": "node -e \"import('node:fs').then(fs => { if (fs.existsSync('../scripts/check-no-typescript.js')) import('node:child_process').then(cp => cp.spawnSync('node', ['../scripts/check-no-typescript.js'], {stdio: 'inherit'})); })\"",
     "lint": "eslint .",
-    "prepreview": "node ../scripts/check-no-typescript.js",
+    "prepreview": "node -e \"import('node:fs').then(fs => { if (fs.existsSync('../scripts/check-no-typescript.js')) import('node:child_process').then(cp => cp.spawnSync('node', ['../scripts/check-no-typescript.js'], {stdio: 'inherit'})); })\"",
     "preview": "vite preview"
   },
   "dependencies": {

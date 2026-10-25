@@ -16,21 +16,31 @@ dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '../.env' })
 
 const app = express()
 const port = Number(process.env.PORT) || 5000
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+const configuredOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .split(',')
-  .map((origin) => origin.trim())
+  .map((origin) => origin.trim().replace(/\/+$/, ''))
   .filter(Boolean)
+
+const defaultOrigins = ['http://localhost:5173', 'https://nrbfit.vercel.app']
+const allowedOrigins = Array.from(new Set([...defaultOrigins, ...configuredOrigins]))
 
 // Allow the browser client to send JSON requests and session cookies while
 // still keeping the allowed frontend origin explicit for cross-origin calls.
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) return callback(null, true)
+    const normalizedOrigin = origin.replace(/\/+$/, '')
+    const isAllowed =
+      allowedOrigins.includes(normalizedOrigin) ||
+      /^https:\/\/nrbfit.*\.vercel\.app$/.test(normalizedOrigin) ||
+      /^http:\/\/localhost(:\d+)?$/.test(normalizedOrigin)
+
+    if (isAllowed) {
       callback(null, true)
       return
     }
 
-    callback(new Error('The request origin is not allowed by the API.'))
+    callback(new Error(`The request origin ${origin} is not allowed by the API.`))
   },
   credentials: true,
 }))

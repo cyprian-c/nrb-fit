@@ -2,6 +2,10 @@
   "name": "nrbfit-workspace",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
     "dev": "concurrently --names client,server --prefix-colors cyan,green \"npm run dev:client\" \"npm run dev:server\"",
     "dev:client": "cd client && npm run dev",
@@ -14,15 +18,13 @@
     "neon:plan": "npm run check:javascript && neon config plan --config neon.js",
     "neon:deploy": "npm run check:javascript && neon deploy --config neon.js",
     "tasks": "node scripts/task-status.js",
-    "tasks:sync": "node scripts/task-status.js --sync"
+    "tasks:sync": "node scripts/task-status.js --sync",
+    "test": "npm run check:javascript && npm run lint:client"
   },
   "dependencies": {
     "@neon/config": "^1.9.3",
     "@neon/env": "^1.6.4",
     "@neondatabase/serverless": "^1.2.0"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
   },
   "devDependencies": {
     "concurrently": "^10.0.6"
