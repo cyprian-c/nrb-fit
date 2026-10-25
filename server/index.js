@@ -10,9 +10,12 @@ import enquiryRoutes from './routes/enquiryRoutes.js'
 import membershipRoutes from './routes/membershipRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
-// In local development the workspace keeps its real .env at the repository
-// root. Deployed environments already expose process variables directly.
+// Load environment variables from local server directory and workspace root.
+dotenv.config()
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '../.env' })
+if (!process.env.JWT_SECRET && process.env.NODE_ENV !== 'production') {
+  process.env.JWT_SECRET = 'nrbfit_jwt_session_secret_development_fallback_key'
+}
 
 const app = express()
 const port = Number(process.env.PORT) || 5000

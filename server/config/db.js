@@ -2,8 +2,9 @@ import dotenv from 'dotenv'
 import { neon } from '@neondatabase/serverless'
 import pg from 'pg'
 
-// Local development may keep the shared workspace .env at the repository root,
+// Local development may keep .env at the server workspace or repository root,
 // while deployed environments provide DATABASE_URL directly at process level.
+dotenv.config()
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '../.env' })
 
 const { Pool } = pg
