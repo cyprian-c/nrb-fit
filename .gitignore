@@ -4,12 +4,11 @@ node_modules/
 .env.*
 *.local
 !.env.example
-dist/
 
-# Documentation & AI Context (Excluded from git tracking as requested)
-context/
-task.md
-site.md
+# Documentation & AI Context (Root level only - preserves client/src/context)
+/context/
+/task.md
+/site.md
 
 # Logs
 logs
@@ -20,10 +19,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependencies & Build Outputs
+# Dependencies & Build Caches
 node_modules/
-dist/
 dist-ssr/
+.cache/
+.vite/
 
 # Editor directories and files
 .vscode/*

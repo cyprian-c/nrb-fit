@@ -65,6 +65,12 @@ echo "--> Checking out commit ${LAST_COMMIT:0:7} into $TARGET_DIR..."
 git --work-tree="$TARGET_DIR" --git-dir="$GIT_DIR" checkout -f "$BRANCH"
 git --work-tree="$TARGET_DIR" --git-dir="$GIT_DIR" reset --hard "$LAST_COMMIT"
 
+# Keep server hook synchronized with repo version for subsequent deployments
+if [ -f "$TARGET_DIR/scripts/namecheap-post-receive.sh" ] && [ -w "$GIT_DIR/hooks/post-receive" ]; then
+  cp "$TARGET_DIR/scripts/namecheap-post-receive.sh" "$GIT_DIR/hooks/post-receive" 2>/dev/null || true
+  chmod +x "$GIT_DIR/hooks/post-receive" 2>/dev/null || true
+fi
+
 # Clean out any leftover or orphaned files from prior deployments while preserving .env configuration
 echo "--> Cleaning untracked leftovers from working tree..."
 git --work-tree="$TARGET_DIR" --git-dir="$GIT_DIR" clean -ffdx \
@@ -134,9 +140,13 @@ fi
 echo "--> Installing npm dependencies (root & workspaces)..."
 npm install --no-audit --no-fund --prefer-offline
 
-# 7. Build Vite production client
-echo "--> Building production frontend client..."
-npm run build:client
+# 7. Deploy pre-built frontend assets
+if [ -f "$TARGET_DIR/client/dist/index.html" ]; then
+  echo "--> Pre-built frontend bundle detected (client/dist). Using pre-compiled production code."
+else
+  echo "--> Pre-built bundle not detected. Building frontend client on server..."
+  npm run build:client
+fi
 
 # 8. Run database migrations if configured
 if [ -f "server/scripts/migrate.js" ]; then
