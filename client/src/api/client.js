@@ -1,7 +1,7 @@
 const API_BASE =
   import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD
-    ? 'https://nrbfit-api.onrender.com/api'
+    ? '/api'
     : 'http://localhost:5000/api')
 
 // Keep API failures as normal Error objects so callers can show the server's
