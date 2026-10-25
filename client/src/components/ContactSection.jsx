@@ -1,22 +1,49 @@
 import { useState, useRef } from 'react'
+import { sendEnquiry } from '../api/client.js'
 
-// ContactSection: handles enquiry workflows via direct mailto or WhatsApp deep link with client-side validation.
+// ContactSection: handles direct database enquiry submission with fallback to mailto and WhatsApp.
 export default function ContactSection() {
   const formRef = useRef(null)
   const [status, setStatus] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleAction = (channel) => {
-    if (!formRef.current) return
-
-    if (!formRef.current.reportValidity()) {
-      return
-    }
+  const handleSubmitApi = async (e) => {
+    e.preventDefault()
+    if (!formRef.current || !formRef.current.reportValidity()) return
 
     const formData = new FormData(formRef.current)
-    const name = formData.get('name') || ''
-    const email = formData.get('email') || ''
-    const interest = formData.get('interest') || ''
-    const message = formData.get('message') || ''
+    const name = String(formData.get('name') || '').trim()
+    const email = String(formData.get('email') || '').trim()
+    const interest = String(formData.get('interest') || '').trim()
+    const message = String(formData.get('message') || '').trim()
+
+    setIsSubmitting(true)
+    setStatus('')
+
+    try {
+      await sendEnquiry({ name, email, interest, message })
+      setStatus('Enquiry received! Studio team will contact you shortly.')
+      formRef.current.reset()
+    } catch {
+      // If server or network fails, offer instant mailto fallback
+      setStatus('Saved draft! Opening your default email client...')
+      const subject = `NRBFIT Enquiry: ${interest} - ${name}`
+      const body = `Hi NRBFIT team,\n\nName: ${name}\nEmail: ${email}\nEnquiry Topic: ${interest}\n\nMessage:\n${message}\n`
+      window.location.href = `mailto:hello@nrbfit.co.ke?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    } finally {
+      setIsSubmitting(false)
+      setTimeout(() => setStatus(''), 7000)
+    }
+  }
+
+  const handleAction = (channel) => {
+    if (!formRef.current || !formRef.current.reportValidity()) return
+
+    const formData = new FormData(formRef.current)
+    const name = String(formData.get('name') || '').trim()
+    const email = String(formData.get('email') || '').trim()
+    const interest = String(formData.get('interest') || '').trim()
+    const message = String(formData.get('message') || '').trim()
 
     if (channel === 'email') {
       const subject = `NRBFIT Enquiry: ${interest} - ${name}`
@@ -60,7 +87,7 @@ export default function ContactSection() {
           </div>
         </div>
 
-        <form ref={formRef} onSubmit={(e) => e.preventDefault()} className="grid gap-3">
+        <form ref={formRef} onSubmit={handleSubmitApi} className="grid gap-3">
           <label htmlFor="name" className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
             Your name
           </label>
@@ -118,11 +145,11 @@ export default function ContactSection() {
 
           <div className="mt-2 flex flex-col gap-3 sm:flex-row">
             <button
-              type="button"
-              onClick={() => handleAction('email')}
-              className="inline-flex min-h-[50px] cursor-pointer items-center justify-center bg-[#10110f] px-5 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f]"
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex min-h-[50px] cursor-pointer items-center justify-center bg-[#10110f] px-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f] disabled:cursor-wait disabled:opacity-60"
             >
-              Send by email
+              {isSubmitting ? 'Sending...' : 'Send enquiry'}
             </button>
             <button
               type="button"
