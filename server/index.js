@@ -11,6 +11,7 @@ import classRoutes from './routes/classRoutes.js'
 import coachRoutes from './routes/coachRoutes.js'
 import enquiryRoutes from './routes/enquiryRoutes.js'
 import membershipRoutes from './routes/membershipRoutes.js'
+import portalRoutes from './routes/portalRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 // Load environment variables from local server directory and workspace root.
@@ -83,6 +84,7 @@ app.use('/api/classes', classRoutes)
 app.use('/api/coaches', coachRoutes)
 app.use('/api/memberships', membershipRoutes)
 app.use('/api/enquiries', enquiryRoutes)
+app.use('/api/portal', portalRoutes)
 
 // Serve frontend client dist in production if available (workspace build or public dir)
 const distCandidates = [
