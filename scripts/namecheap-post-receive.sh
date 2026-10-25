@@ -78,6 +78,7 @@ git --work-tree="$TARGET_DIR" --git-dir="$GIT_DIR" clean -ffdx \
   -e .env.* \
   -e server/.env \
   -e server/.env.* \
+  -e .htaccess \
   -e node_modules \
   -e client/node_modules \
   -e server/node_modules \
@@ -122,6 +123,30 @@ else
   echo "--> [ERROR] Node.js executable was not detected on the server!"
   echo "--> Please verify your Node.js App in cPanel (cPanel -> Setup Node.js App for nrbfit.cyprian.services)."
   exit 1
+fi
+
+# Ensure .htaccess has CloudLinux Passenger configuration pointing to active node binary
+NODE_EXEC="$(command -v node)"
+if [ ! -f "$TARGET_DIR/.htaccess" ] || ! grep -q "PassengerAppRoot" "$TARGET_DIR/.htaccess" 2>/dev/null; then
+  echo "--> Configuring CloudLinux Passenger directives in .htaccess..."
+  cat << HTACCESS_EOF > "$TARGET_DIR/.htaccess"
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "$TARGET_DIR"
+PassengerBaseURI "/"
+PassengerNodejs "$NODE_EXEC"
+PassengerAppType node
+PassengerStartupFile app.js
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+
+Options -Indexes
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+HTACCESS_EOF
+elif grep -q "PassengerNodejs" "$TARGET_DIR/.htaccess" 2>/dev/null; then
+  # Keep PassengerNodejs path updated to current node binary
+  sed -i "s|^PassengerNodejs .*|PassengerNodejs \"$NODE_EXEC\"|" "$TARGET_DIR/.htaccess" 2>/dev/null || true
 fi
 
 # Bound memory allocation to prevent CloudLinux LVE limits from killing the build

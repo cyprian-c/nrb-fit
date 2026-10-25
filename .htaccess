@@ -1,0 +1,27 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/dreaifwi/nrbfit.cyprian.services"
+PassengerBaseURI "/"
+PassengerNodejs "/home/dreaifwi/nodevenv/nrbfit.cyprian.services/20/bin/node"
+PassengerAppType node
+PassengerStartupFile app.js
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+
+# Prevent directory indexing
+Options -Indexes
+
+# Ensure Authorization headers are passed to Node.js
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# Protect sensitive environment and config files
+<FilesMatch "^\.env|\.git|package(-lock)?\.json">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
