@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react'
-import { fetchClasses } from '../api/client.js'
+import { createBooking, fetchClasses } from '../api/client.js'
+import { useAuth } from '../context/AuthContext.jsx'
 import { classSchedule as fallbackClasses } from '../data/siteData'
 
-// ClassScheduleSection: keeps a real category filter in state and loads live data with graceful offline fallback.
-export default function ClassScheduleSection() {
+// ClassScheduleSection: keeps a real category filter in state, loads live data, and supports slot booking.
+export default function ClassScheduleSection({ onOpenAuth }) {
+  const { user } = useAuth()
   const [classes, setClasses] = useState(fallbackClasses)
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [bookedIds, setBookedIds] = useState(() => new Set())
+  const [loadingBookingId, setLoadingBookingId] = useState(null)
+  const [bookingFeedback, setBookingFeedback] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -32,6 +37,36 @@ export default function ClassScheduleSection() {
       ? classes
       : classes.filter((item) => item.category === selectedCategory)
 
+  async function handleBook(item, index) {
+    const classId = item.id || (index + 1)
+
+    if (!user) {
+      setBookingFeedback('Please sign in or create an account to reserve a workout slot.')
+      onOpenAuth?.()
+      return
+    }
+
+    if (bookedIds.has(classId)) return
+
+    setLoadingBookingId(classId)
+    setBookingFeedback('')
+
+    try {
+      await createBooking({ class_id: classId })
+      setBookedIds((prev) => new Set([...prev, classId]))
+      setBookingFeedback(`Spot reserved for ${item.name}! Check your email for confirmation.`)
+    } catch (err) {
+      if (err.message?.includes('already booked')) {
+        setBookedIds((prev) => new Set([...prev, classId]))
+        setBookingFeedback(`You are already booked into ${item.name}.`)
+      } else {
+        setBookingFeedback(err.message || 'Unable to complete reservation.')
+      }
+    } finally {
+      setLoadingBookingId(null)
+    }
+  }
+
   return (
     <section id="classes" className="border-t border-[#e4e5df] py-16 sm:py-20" aria-labelledby="classes-title">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -51,6 +86,15 @@ export default function ClassScheduleSection() {
       <p className="mb-6 max-w-3xl text-xs leading-7 text-[#555750] sm:text-sm">
         Ten coached sessions run Monday to Friday, with a focused Saturday programme. Class themes rotate through the week; message us to confirm the day’s coach and availability.
       </p>
+
+      {bookingFeedback && (
+        <div
+          role="status"
+          className="mb-6 border border-[#c8f31d] bg-[#f8f8f5] px-4 py-3 text-xs font-semibold text-[#10110f]"
+        >
+          {bookingFeedback}
+        </div>
+      )}
 
       <div className="mb-6 flex flex-wrap gap-2">
         {categories.map((category) => {
@@ -81,29 +125,53 @@ export default function ClassScheduleSection() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-none border border-[#e4e5df] bg-white">
-          <div className="grid grid-cols-[0.65fr_minmax(0,1.8fr)_0.65fr] items-center gap-2 border-b border-[#e4e5df] bg-[#f8f8f5] px-3 py-3 text-[9px] font-bold uppercase tracking-[0.12em] text-[#777a73] sm:grid-cols-[0.8fr_1.8fr_1.6fr_0.7fr] sm:gap-3 sm:px-4">
+          <div className="grid grid-cols-[0.6fr_minmax(0,1.6fr)_0.6fr_auto] items-center gap-2 border-b border-[#e4e5df] bg-[#f8f8f5] px-3 py-3 text-[9px] font-bold uppercase tracking-[0.12em] text-[#777a73] sm:grid-cols-[0.7fr_1.6fr_1.4fr_0.6fr_auto] sm:gap-3 sm:px-4">
             <span>Time</span>
             <span>Session</span>
             <span className="hidden sm:block">Focus</span>
             <span>Duration</span>
+            <span className="text-right">Action</span>
           </div>
 
-          {filteredClasses.map((item) => (
-            <div
-              key={`${item.time}-${item.name}`}
-              className="grid grid-cols-[0.65fr_minmax(0,1.8fr)_0.65fr] items-center gap-2 border-b border-[#e4e5df] px-3 py-4 text-[10px] text-[#10110f] last:border-b-0 sm:grid-cols-[0.8fr_1.8fr_1.6fr_0.7fr] sm:gap-3 sm:px-4 sm:text-[11px]"
-            >
-              <span className="font-bold">{item.time}</span>
-              <span className="min-w-0 font-bold">
-                {item.name}
-                <span className="mt-1 inline-block rounded bg-[#f1f2ed] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-[#10110f] sm:ml-2 sm:mt-0">
-                  {item.category}
+          {filteredClasses.map((item, index) => {
+            const classId = item.id || (index + 1)
+            const isBooked = bookedIds.has(classId)
+            const isLoading = loadingBookingId === classId
+
+            return (
+              <div
+                key={`${item.time}-${item.name}`}
+                className="grid grid-cols-[0.6fr_minmax(0,1.6fr)_0.6fr_auto] items-center gap-2 border-b border-[#e4e5df] px-3 py-4 text-[10px] text-[#10110f] last:border-b-0 sm:grid-cols-[0.7fr_1.6fr_1.4fr_0.6fr_auto] sm:gap-3 sm:px-4 sm:text-[11px]"
+              >
+                <span className="font-bold">{item.time}</span>
+                <span className="min-w-0 font-bold">
+                  {item.name}
+                  <span className="mt-1 inline-block rounded bg-[#f1f2ed] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-[#10110f] sm:ml-2 sm:mt-0">
+                    {item.category}
+                  </span>
                 </span>
-              </span>
-              <span className="hidden text-[#555750] sm:block">{item.focus}</span>
-              <span className="whitespace-nowrap">{item.duration}</span>
-            </div>
-          ))}
+                <span className="hidden text-[#555750] sm:block">{item.focus}</span>
+                <span className="whitespace-nowrap">{item.duration}</span>
+                <div className="text-right">
+                  <button
+                    type="button"
+                    disabled={isBooked || isLoading}
+                    onClick={() => handleBook(item, index)}
+                    className={[
+                      'inline-flex min-h-[32px] cursor-pointer items-center justify-center px-3 text-[9px] font-bold uppercase tracking-[0.14em] transition',
+                      isBooked
+                        ? 'cursor-default bg-[#f1f2ed] text-[#719500]'
+                        : 'bg-[#10110f] text-white hover:bg-[#c8f31d] hover:text-[#10110f]',
+                      isLoading ? 'opacity-60 cursor-wait' : '',
+                    ].join(' ')}
+                    aria-label={`Book ${item.name} at ${item.time}`}
+                  >
+                    {isLoading ? 'Booking...' : isBooked ? 'Booked ✓' : 'Book'}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 
