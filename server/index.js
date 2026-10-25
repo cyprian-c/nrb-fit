@@ -34,6 +34,8 @@ const configuredOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
 const defaultOrigins = [
   'http://localhost:5173',
   'https://nrbfit.vercel.app',
+  'https://nrbfit.cyprian.services',
+  'http://nrbfit.cyprian.services',
   'https://nrfit.cyprian.services',
   'http://nrfit.cyprian.services',
 ]
@@ -48,7 +50,7 @@ app.use(cors({
     const isAllowed =
       allowedOrigins.includes(normalizedOrigin) ||
       /^https:\/\/nrbfit.*\.vercel\.app$/.test(normalizedOrigin) ||
-      /^https?:\/\/nrfit\.cyprian\.services$/.test(normalizedOrigin) ||
+      /^https?:\/\/nrb?fit\.cyprian\.services$/.test(normalizedOrigin) ||
       /^http:\/\/localhost(:\d+)?$/.test(normalizedOrigin)
 
     if (isAllowed) {

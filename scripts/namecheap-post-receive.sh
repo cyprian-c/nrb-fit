@@ -8,7 +8,7 @@
 set -euo pipefail
 
 # 1. Deployment paths (adjust if your cPanel app root differs)
-TARGET_DIR="${TARGET_DIR:-$HOME/nrfit.cyprian.services}"
+TARGET_DIR="${TARGET_DIR:-$HOME/nrbfit.cyprian.services}"
 GIT_DIR="${GIT_DIR:-$HOME/repo/nrb-fit.git}"
 BRANCH="${DEPLOY_BRANCH:-main}"
 
@@ -20,10 +20,12 @@ echo "============================================================"
 
 # Read standard input for pushed refs
 PUSHED_BRANCH=""
+LAST_COMMIT=""
 while read -r oldrev newrev refname; do
   BRANCH_NAME=$(echo "$refname" | sed 's/refs\/heads\///')
   if [ "$BRANCH_NAME" = "$BRANCH" ]; then
     PUSHED_BRANCH="$BRANCH_NAME"
+    LAST_COMMIT="$newrev"
     echo "--> Pushed to $BRANCH_NAME (commit: ${newrev:0:7})"
   fi
 done
@@ -32,16 +34,23 @@ if [ -z "$PUSHED_BRANCH" ]; then
   echo "--> Notice: Push did not target '$BRANCH'. Performing deploy for '$BRANCH' anyway..."
 fi
 
-# 2. Checkout latest code into working directory
-echo "--> Checking out latest code from branch '$BRANCH'..."
+# 2. Clean up and checkout latest code into target directory
+echo "--> Cleaning up branch and syncing target directory..."
 mkdir -p "$TARGET_DIR"
+
+# Clean working tree in target directory while preserving environment files (.env)
 git --work-tree="$TARGET_DIR" --git-dir="$GIT_DIR" checkout -f "$BRANCH"
+if [ -n "$LAST_COMMIT" ] && [ "$LAST_COMMIT" != "0000000000000000000000000000000000000000" ]; then
+  echo "--> Resetting to pushed commit ${LAST_COMMIT:0:7}..."
+  git --work-tree="$TARGET_DIR" --git-dir="$GIT_DIR" reset --hard "$LAST_COMMIT"
+fi
+git --work-tree="$TARGET_DIR" --git-dir="$GIT_DIR" clean -fd -e .env -e server/.env -e node_modules -e client/node_modules -e server/node_modules 2>/dev/null || true
 
 cd "$TARGET_DIR"
 
 # 3. Locate and activate cPanel CloudLinux Node.js virtual environment
 echo "--> Configuring Node.js runtime..."
-NODE_ACTIVATE=$(find "$HOME/nodevenv" -type f -name "activate" 2>/dev/null | grep "nrfit" | head -n 1 || true)
+NODE_ACTIVATE=$(find "$HOME/nodevenv" -type f -name "activate" 2>/dev/null | grep -E "nrbfit|nrfit" | head -n 1 || true)
 if [ -z "$NODE_ACTIVATE" ]; then
   NODE_ACTIVATE=$(find "$HOME/nodevenv" -type f -name "activate" 2>/dev/null | head -n 1 || true)
 fi
@@ -105,7 +114,7 @@ touch "$TARGET_DIR/tmp/restart.txt"
 echo ""
 echo "============================================================"
 echo " [SUCCESS] NRBFIT deployment completed successfully!"
-echo " Live URL: https://nrfit.cyprian.services"
-echo " Health:   https://nrfit.cyprian.services/api/health"
+echo " Live URL: https://nrbfit.cyprian.services"
+echo " Health:   https://nrbfit.cyprian.services/api/health"
 echo "============================================================"
 echo ""

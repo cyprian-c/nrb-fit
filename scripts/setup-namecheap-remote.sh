@@ -9,7 +9,7 @@ set -euo pipefail
 DEFAULT_USER="dreaifwi"
 DEFAULT_HOST="198.54.126.157"
 DEFAULT_PORT="21098"
-DEFAULT_SUBDOMAIN="nrfit.cyprian.services"
+DEFAULT_SUBDOMAIN="nrbfit.cyprian.services"
 
 echo "============================================================"
 echo " NRBFIT Namecheap Deployment Automation Setup"
@@ -30,7 +30,7 @@ SERVER_HOST="${SERVER_HOST:-$DEFAULT_HOST}"
 read -r -p "Enter your SSH port (Namecheap uses 21098) [$DEFAULT_PORT]: " SSH_PORT
 SSH_PORT="${SSH_PORT:-$DEFAULT_PORT}"
 
-APP_ROOT="~/nrfit.cyprian.services"
+APP_ROOT="~/nrbfit.cyprian.services"
 REMOTE_REPO="~/repo/nrb-fit.git"
 REMOTE_GIT_URL="ssh://${CPANEL_USER}@${SERVER_HOST}:${SSH_PORT}/home/${CPANEL_USER}/repo/nrb-fit.git"
 
