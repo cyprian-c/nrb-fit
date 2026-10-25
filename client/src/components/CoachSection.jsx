@@ -1,7 +1,38 @@
-import { coachProfiles } from '../data/siteData'
+import { useEffect, useState } from 'react'
+import { fetchCoaches } from '../api/client.js'
+import { coachProfiles as fallbackCoaches } from '../data/siteData'
 
-// CoachSection: renders the profile grid from the centralized coach data with local portrait assets.
+// CoachSection: renders the profile grid from live database API with fallback to bundled portrait assets.
 export default function CoachSection() {
+  const [coaches, setCoaches] = useState(fallbackCoaches)
+
+  useEffect(() => {
+    let isMounted = true
+
+    fetchCoaches()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          // Preserve bundled WebP image assets when mapping database coaches
+          const imageMap = Object.fromEntries(
+            fallbackCoaches.map((item) => [item.name.toLowerCase(), item.image]),
+          )
+
+          const enriched = data.map((item) => ({
+            ...item,
+            image: imageMap[item.name.toLowerCase()] || item.image_url || fallbackCoaches[0].image,
+          }))
+          setCoaches(enriched)
+        }
+      })
+      .catch(() => {
+        // Fall back gracefully to bundled coach profiles if API is cold or offline.
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   return (
     <section id="coaches" className="bg-[#f6f7f3] py-16 sm:py-20" aria-labelledby="coaches-title">
       <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-20">
@@ -21,7 +52,7 @@ export default function CoachSection() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {coachProfiles.map((coach, index) => (
+          {coaches.map((coach, index) => (
             <article key={coach.name} className="overflow-hidden bg-white">
               <div className="relative h-[300px] overflow-hidden sm:h-[340px]">
                 <img

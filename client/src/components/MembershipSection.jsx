@@ -1,12 +1,49 @@
-import { useState } from 'react'
-import { membershipPlans } from '../data/siteData'
+import { useEffect, useState } from 'react'
+import { fetchMemberships } from '../api/client.js'
+import { membershipPlans as fallbackMemberships } from '../data/siteData'
 import QuantityStepper from './QuantityStepper'
 
 // MembershipSection: shows the studio pricing and includes a reusable stepper used on each item card.
 export default function MembershipSection() {
+  const [memberships, setMemberships] = useState(fallbackMemberships)
   const [quantities, setQuantities] = useState(() =>
-    Object.fromEntries(membershipPlans.map((plan) => [plan.label, 1])),
+    Object.fromEntries(fallbackMemberships.map((plan) => [plan.label, 1])),
   )
+
+  useEffect(() => {
+    let isMounted = true
+
+    fetchMemberships()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          const enriched = data.map((plan) => ({
+            ...plan,
+            perks: Array.isArray(plan.perks)
+              ? plan.perks
+              : typeof plan.perks === 'string'
+                ? JSON.parse(plan.perks)
+                : [],
+          }))
+          setMemberships(enriched)
+          setQuantities((current) => {
+            const nextQuantities = { ...current }
+            enriched.forEach((plan) => {
+              if (nextQuantities[plan.label] === undefined) {
+                nextQuantities[plan.label] = 1
+              }
+            })
+            return nextQuantities
+          })
+        }
+      })
+      .catch(() => {
+        // Fall back gracefully to bundled memberships if API is cold or offline.
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const updateQuantity = (label, value) => {
     setQuantities((current) => ({ ...current, [label]: value }))
@@ -30,7 +67,7 @@ export default function MembershipSection() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {membershipPlans.map((plan) => (
+        {memberships.map((plan) => (
           <article
             key={plan.label}
             className={[
@@ -70,7 +107,7 @@ export default function MembershipSection() {
             <div className="mt-auto pt-5">
               <QuantityStepper
                 label={plan.label}
-                value={quantities[plan.label]}
+                value={quantities[plan.label] ?? 1}
                 onChange={(value) => updateQuantity(plan.label, value)}
                 min={0}
                 max={9}

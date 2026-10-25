@@ -1,15 +1,36 @@
-import { useState } from 'react'
-import { classSchedule } from '../data/siteData'
+import { useEffect, useState } from 'react'
+import { fetchClasses } from '../api/client.js'
+import { classSchedule as fallbackClasses } from '../data/siteData'
 
-// ClassScheduleSection: keeps a real category filter in state and filters the schedule data before rendering.
+// ClassScheduleSection: keeps a real category filter in state and loads live data with graceful offline fallback.
 export default function ClassScheduleSection() {
-  const categories = ['All', ...new Set(classSchedule.map((item) => item.category))]
+  const [classes, setClasses] = useState(fallbackClasses)
   const [selectedCategory, setSelectedCategory] = useState('All')
+
+  useEffect(() => {
+    let isMounted = true
+
+    fetchClasses()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setClasses(data)
+        }
+      })
+      .catch(() => {
+        // Fall back gracefully to bundled timetable if API is cold or offline.
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const categories = ['All', ...new Set(classes.map((item) => item.category))]
 
   const filteredClasses =
     selectedCategory === 'All'
-      ? classSchedule
-      : classSchedule.filter((item) => item.category === selectedCategory)
+      ? classes
+      : classes.filter((item) => item.category === selectedCategory)
 
   return (
     <section id="classes" className="border-t border-[#e4e5df] py-16 sm:py-20" aria-labelledby="classes-title">
