@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Namecheap Git Deployment Hook (post-receive)
-# Path on server: ~/repos/nrb-fit.git/hooks/post-receive
-# Permissions: chmod +x ~/repos/nrb-fit.git/hooks/post-receive
+# Path on server: ~/repo/nrb-fit.git/hooks/post-receive
+# Permissions: chmod +x ~/repo/nrb-fit.git/hooks/post-receive
 # ==============================================================================
 
 set -euo pipefail
 
 # 1. Deployment paths (adjust if your cPanel app root differs)
 TARGET_DIR="${TARGET_DIR:-$HOME/nrfit.cyprian.services}"
-GIT_DIR="${GIT_DIR:-$HOME/repos/nrb-fit.git}"
+GIT_DIR="${GIT_DIR:-$HOME/repo/nrb-fit.git}"
 BRANCH="${DEPLOY_BRANCH:-main}"
 
 echo ""

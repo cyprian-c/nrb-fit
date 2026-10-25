@@ -6,7 +6,8 @@
 
 set -euo pipefail
 
-DEFAULT_HOST="cyprian.services"
+DEFAULT_USER="dreaifwi"
+DEFAULT_HOST="198.54.126.157"
 DEFAULT_PORT="21098"
 DEFAULT_SUBDOMAIN="nrfit.cyprian.services"
 
@@ -20,11 +21,8 @@ echo "and registers the 'production' git remote locally."
 echo ""
 
 # 1. Gather configuration
-read -r -p "Enter your Namecheap cPanel username: " CPANEL_USER
-if [ -z "$CPANEL_USER" ]; then
-  echo "Error: cPanel username is required."
-  exit 1
-fi
+read -r -p "Enter your Namecheap cPanel username [$DEFAULT_USER]: " CPANEL_USER
+CPANEL_USER="${CPANEL_USER:-$DEFAULT_USER}"
 
 read -r -p "Enter your server hostname or IP [$DEFAULT_HOST]: " SERVER_HOST
 SERVER_HOST="${SERVER_HOST:-$DEFAULT_HOST}"
@@ -33,8 +31,8 @@ read -r -p "Enter your SSH port (Namecheap uses 21098) [$DEFAULT_PORT]: " SSH_PO
 SSH_PORT="${SSH_PORT:-$DEFAULT_PORT}"
 
 APP_ROOT="~/nrfit.cyprian.services"
-REMOTE_REPO="~/repos/nrb-fit.git"
-REMOTE_GIT_URL="ssh://${CPANEL_USER}@${SERVER_HOST}:${SSH_PORT}/home/${CPANEL_USER}/repos/nrb-fit.git"
+REMOTE_REPO="~/repo/nrb-fit.git"
+REMOTE_GIT_URL="ssh://${CPANEL_USER}@${SERVER_HOST}:${SSH_PORT}/home/${CPANEL_USER}/repo/nrb-fit.git"
 
 echo ""
 echo "------------------------------------------------------------"
@@ -65,11 +63,11 @@ HOOK_FILE="${SCRIPT_DIR}/namecheap-post-receive.sh"
 
 if [ "$CAN_SSH" = true ]; then
   echo "--> Creating remote bare git repository at ${REMOTE_REPO}..."
-  ssh -p "${SSH_PORT}" "${CPANEL_USER}@${SERVER_HOST}" "mkdir -p ~/repos/nrb-fit.git/hooks && cd ~/repos/nrb-fit.git && git init --bare"
+  ssh -p "${SSH_PORT}" "${CPANEL_USER}@${SERVER_HOST}" "mkdir -p ~/repo/nrb-fit.git/hooks && cd ~/repo/nrb-fit.git && git init --bare"
 
   echo "--> Uploading post-receive hook..."
-  scp -P "${SSH_PORT}" "${HOOK_FILE}" "${CPANEL_USER}@${SERVER_HOST}:/home/${CPANEL_USER}/repos/nrb-fit.git/hooks/post-receive"
-  ssh -p "${SSH_PORT}" "${CPANEL_USER}@${SERVER_HOST}" "chmod +x /home/${CPANEL_USER}/repos/nrb-fit.git/hooks/post-receive"
+  scp -P "${SSH_PORT}" "${HOOK_FILE}" "${CPANEL_USER}@${SERVER_HOST}:/home/${CPANEL_USER}/repo/nrb-fit.git/hooks/post-receive"
+  ssh -p "${SSH_PORT}" "${CPANEL_USER}@${SERVER_HOST}" "chmod +x /home/${CPANEL_USER}/repo/nrb-fit.git/hooks/post-receive"
   echo "--> Post-receive hook installed and made executable!"
 else
   echo ""
@@ -79,12 +77,12 @@ else
   echo "Log into cPanel -> Open 'Terminal' (or SSH manually), then run:"
   echo ""
   cat <<EOF
-mkdir -p ~/repos/nrb-fit.git/hooks
-cd ~/repos/nrb-fit.git && git init --bare
-cat << 'HOOK_EOF' > ~/repos/nrb-fit.git/hooks/post-receive
+mkdir -p ~/repo/nrb-fit.git/hooks
+cd ~/repo/nrb-fit.git && git init --bare
+cat << 'HOOK_EOF' > ~/repo/nrb-fit.git/hooks/post-receive
 $(cat "${HOOK_FILE}")
 HOOK_EOF
-chmod +x ~/repos/nrb-fit.git/hooks/post-receive
+chmod +x ~/repo/nrb-fit.git/hooks/post-receive
 EOF
   echo ""
   echo "============================================================"
