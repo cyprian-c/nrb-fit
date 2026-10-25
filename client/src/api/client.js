@@ -85,3 +85,49 @@ export async function fetchMyBookings() {
   const { bookings } = await apiFetch('/bookings/my')
   return bookings
 }
+
+// Member Portal API Functions
+export async function fetchPrograms() {
+  const { programs } = await apiFetch('/portal/programs')
+  return programs
+}
+
+export async function fetchProgramDetail(slug) {
+  const { program } = await apiFetch(`/portal/programs/${encodeURIComponent(slug)}`)
+  return program
+}
+
+export async function enrollProgram(programId) {
+  return apiFetch('/portal/enroll', {
+    method: 'POST',
+    body: { program_id: programId },
+  })
+}
+
+export async function fetchMyEnrollments() {
+  const { enrollments } = await apiFetch('/portal/my-enrollments')
+  return enrollments
+}
+
+export async function logWorkoutSession(payload) {
+  return apiFetch('/portal/log-workout', {
+    method: 'POST',
+    body: payload,
+  })
+}
+
+export async function fetchPortalStats() {
+  const { stats } = await apiFetch('/portal/stats')
+  return stats
+}
+
+export async function fetchAlerts() {
+  const { alerts } = await apiFetch('/portal/alerts')
+  return alerts
+}
+
+export async function markAlertRead(alertId = 'all') {
+  return apiFetch(`/portal/alerts/${encodeURIComponent(alertId)}/read`, {
+    method: 'POST',
+  })
+}
