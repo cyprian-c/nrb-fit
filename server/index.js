@@ -92,12 +92,22 @@ const distCandidates = [
 const clientDistPath = distCandidates.find((dir) => fs.existsSync(dir))
 
 if (clientDistPath) {
-  app.use(express.static(clientDistPath))
+  app.use(
+    express.static(clientDistPath, {
+      maxAge: process.env.NODE_ENV === 'production' ? '1y' : 0,
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'no-cache')
+        }
+      },
+    }),
+  )
   // Fallback for client-side SPA routing (all GET requests that are not /api and did not match a static file)
   app.get('*', (request, response, next) => {
     if (request.path.startsWith('/api')) {
       return next()
     }
+    response.setHeader('Cache-Control', 'no-cache')
     response.sendFile(path.join(clientDistPath, 'index.html'))
   })
 }

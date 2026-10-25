@@ -5,14 +5,19 @@ import { query } from '../config/db.js'
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const sessionCookieName = 'nrb_session'
 const sessionDuration = 7 * 24 * 60 * 60 * 1000
+const isProduction = process.env.NODE_ENV === 'production'
+
+function getCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    maxAge: sessionDuration,
+  }
+}
 
 function setSessionCookie(response, token) {
-  response.cookie(sessionCookieName, token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'none',
-    maxAge: sessionDuration,
-  })
+  response.cookie(sessionCookieName, token, getCookieOptions())
 }
 
 function getSessionToken(request) {
@@ -190,10 +195,8 @@ export async function getCurrentUser(request, response, next) {
 
 // Remove the browser session without requiring a valid token first.
 export function logout(request, response) {
-  response.clearCookie(sessionCookieName, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'none',
-  })
+  const options = getCookieOptions()
+  delete options.maxAge
+  response.clearCookie(sessionCookieName, options)
   response.json({ message: 'Logged out successfully' })
 }

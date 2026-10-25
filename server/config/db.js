@@ -14,14 +14,16 @@ const sql = databaseUrl ? neon(databaseUrl) : null
 // Keep pg available for migration and seed scripts, which need interactive
 // transactions. Request handlers use the HTTP driver below and do not hold a
 // WebSocket connection open for each serverless request.
-export const pool = new Pool({
-  connectionString: databaseUrl,
-  ssl: { rejectUnauthorized: false },
-  max: 10,
-  idleTimeoutMillis: 10_000,
-  connectionTimeoutMillis: 5_000,
-  allowExitOnIdle: true,
-})
+export const pool = databaseUrl
+  ? new Pool({
+      connectionString: databaseUrl,
+      ssl: { rejectUnauthorized: false },
+      max: 10,
+      idleTimeoutMillis: 10_000,
+      connectionTimeoutMillis: 5_000,
+      allowExitOnIdle: true,
+    })
+  : null
 
 // Execute one parameterized HTTP query at a time and return a pg-shaped result
 // so existing controllers do not need to know which Neon transport is used.

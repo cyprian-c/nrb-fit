@@ -5,10 +5,18 @@ node_modules/
 *.local
 !.env.example
 
-# Documentation & AI Context (Root level only - preserves client/src/context)
+# Documentation & Markdown Files (Kept locally, ignored from commits except README)
+*.md
+!README.md
+!/README.md
 /context/
-/task.md
 /site.md
+/task.md
+server/docs/
+
+# Automation, deployment, and server scripts (hidden from commit)
+scripts/*
+!scripts/task-status.js
 
 # Logs
 logs

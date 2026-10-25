@@ -14,17 +14,12 @@
     "build:client": "npm run build --workspace=client",
     "lint": "npm run lint:client",
     "lint:client": "npm run lint --workspace=client",
-    "check:javascript": "node scripts/check-no-typescript.js",
-    "neon:plan": "npm run check:javascript && neon config plan --config neon.js",
-    "neon:deploy": "npm run check:javascript && neon deploy --config neon.js",
     "tasks": "node scripts/task-status.js",
     "tasks:sync": "node scripts/task-status.js --sync",
     "setup:namecheap": "bash scripts/setup-namecheap-remote.sh",
-    "test": "npm run check:javascript && npm run lint:client"
+    "test": "npm run lint:client"
   },
   "dependencies": {
-    "@neon/config": "^1.9.3",
-    "@neon/env": "^1.6.4",
     "@neondatabase/serverless": "^1.2.0",
     "dotenv": "^18.0.9",
     "jsonwebtoken": "^9.0.3"
