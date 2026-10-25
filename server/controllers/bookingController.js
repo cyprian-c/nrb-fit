@@ -116,3 +116,36 @@ export async function getMyBookings(request, response, next) {
     next(error)
   }
 }
+
+export async function cancelBooking(request, response, next) {
+  const bookingId = Number(request.params.id)
+
+  if (!Number.isInteger(bookingId) || bookingId < 1) {
+    response.status(400).json({ error: 'A valid booking id is required.' })
+    return
+  }
+
+  try {
+    const result = await query(
+      `UPDATE bookings
+       SET status = 'cancelled'
+       WHERE id = $1
+         AND status = 'confirmed'
+         AND (user_id = $2 OR $3 = 'admin')
+       RETURNING id, user_id, class_id, booking_date, status, created_at`,
+      [bookingId, request.user.id, request.user.role],
+    )
+
+    if (result.rowCount === 0) {
+      response.status(404).json({ error: 'Active booking not found.' })
+      return
+    }
+
+    response.json({
+      message: 'Booking cancelled successfully.',
+      booking: result.rows[0],
+    })
+  } catch (error) {
+    next(error)
+  }
+}
