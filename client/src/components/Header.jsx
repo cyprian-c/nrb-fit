@@ -33,7 +33,7 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
               <button
                 type="button"
                 onClick={() => onSelectView && onSelectView('studio')}
-                className={`cursor-pointer rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                className={`cursor-pointer rounded-full px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all duration-200 whitespace-nowrap leading-none ${
                   currentView === 'studio'
                     ? 'bg-[#10110f] text-white shadow-xs'
                     : 'text-neutral-600 hover:bg-[#c8f31d] hover:text-[#10110f]'
@@ -44,7 +44,7 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
               <button
                 type="button"
                 onClick={() => onSelectView && onSelectView('portal')}
-                className={`cursor-pointer rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                className={`cursor-pointer rounded-full px-2.5 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all duration-200 whitespace-nowrap leading-none ${
                   currentView === 'portal'
                     ? 'bg-[#10110f] text-white shadow-xs'
                     : 'text-neutral-600 hover:bg-[#c8f31d] hover:text-[#10110f]'
@@ -102,7 +102,7 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
                 <button
                   type="button"
                   onClick={() => onSelectView && onSelectView('portal')}
-                  className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-3.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
+                  className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-2.5 text-[9px] font-bold uppercase tracking-[0.06em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-3 sm:text-[9.5px] whitespace-nowrap leading-none"
                 >
                   Member Portal
                 </button>
@@ -110,7 +110,7 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
                 <button
                   type="button"
                   onClick={() => onSelectView && onSelectView('studio')}
-                  className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-300 bg-white px-3.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
+                  className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-300 bg-white px-2.5 text-[9px] font-bold uppercase tracking-[0.06em] text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-3 sm:text-[9.5px] whitespace-nowrap leading-none"
                 >
                   Studio Overview
                 </button>
@@ -120,7 +120,7 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
               <button
                 type="button"
                 onClick={logout}
-                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-200 bg-white px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-600 shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
+                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-200 bg-white px-2.5 text-[9px] font-bold uppercase tracking-[0.06em] text-neutral-600 shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-3 sm:text-[9.5px] whitespace-nowrap leading-none"
               >
                 Sign Out
               </button>
@@ -130,14 +130,14 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-300 bg-white px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-3.5 sm:text-[11px]"
+                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-300 bg-white px-2.5 text-[9px] font-bold uppercase tracking-[0.06em] text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-3 sm:text-[9.5px] whitespace-nowrap leading-none"
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-3.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-4 sm:text-[11px]"
+                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-2.5 text-[9px] font-bold uppercase tracking-[0.06em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-3.5 sm:text-[9.5px] whitespace-nowrap leading-none"
               >
                 Member Portal
               </button>

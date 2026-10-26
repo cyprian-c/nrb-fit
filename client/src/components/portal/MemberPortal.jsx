@@ -125,7 +125,7 @@ export default function MemberPortal({ onBackToStudio }) {
         <button
           type="button"
           onClick={onBackToStudio}
-          className="inline-flex h-8 cursor-pointer items-center gap-1.5 self-start rounded-xl border border-neutral-300 bg-white px-3 text-xs font-bold uppercase tracking-wider text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
+          className="inline-flex h-8 cursor-pointer items-center gap-1.5 self-start rounded-xl border border-neutral-300 bg-white px-3 text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] whitespace-nowrap leading-none"
         >
           ← Return to Studio Overview
         </button>
