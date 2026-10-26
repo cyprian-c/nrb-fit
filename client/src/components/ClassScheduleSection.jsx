@@ -91,7 +91,7 @@ export default function ClassScheduleSection({ onOpenAuth }) {
       {bookingFeedback && (
         <div
           role="status"
-          className="mb-6 border border-[#c8f31d] bg-[#f8f8f5] px-4 py-3 text-xs font-semibold text-[#10110f]"
+          className="mb-6 rounded-xl border border-[#c8f31d] bg-[#f8faee] px-4 py-3 text-xs font-semibold text-[#10110f]"
         >
           {bookingFeedback}
         </div>
@@ -108,10 +108,10 @@ export default function ClassScheduleSection({ onOpenAuth }) {
               aria-pressed={isActive}
               onClick={() => setSelectedCategory(category)}
               className={[
-                'inline-flex cursor-pointer items-center justify-center border px-3 py-2 text-[9px] font-bold uppercase tracking-[0.14em] transition',
+                'inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border px-3 text-[10px] font-bold uppercase tracking-[0.14em] shadow-2xs transition-all duration-200',
                 isActive
-                  ? 'border-[#10110f] bg-[#10110f] text-white'
-                  : 'border-[#dfe1d9] bg-white text-[#10110f] hover:border-[#10110f]',
+                  ? 'border-[#10110f] bg-[#10110f] text-white shadow-xs'
+                  : 'border-[#dfe1d9] bg-white text-[#10110f] hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f]',
               ].join(' ')}
             >
               {category}
@@ -121,11 +121,11 @@ export default function ClassScheduleSection({ onOpenAuth }) {
       </div>
 
       {filteredClasses.length === 0 ? (
-        <div className="border border-[#e4e5df] bg-[#f8f8f5] px-4 py-8 text-sm text-[#555750]">
+        <div className="rounded-2xl border border-[#e4e5df] bg-[#f8f8f5] px-4 py-8 text-center text-sm text-[#555750]">
           No classes match this filter yet. Try another category.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-none border border-[#e4e5df] bg-white">
+        <div className="overflow-hidden rounded-2xl border border-[#e4e5df] bg-white shadow-xs">
           <div className="grid grid-cols-[0.6fr_minmax(0,1.6fr)_0.6fr_auto] items-center gap-2 border-b border-[#e4e5df] bg-[#f8f8f5] px-3 py-3 text-[9px] font-bold uppercase tracking-[0.12em] text-[#777a73] sm:grid-cols-[0.7fr_1.6fr_1.4fr_0.6fr_auto] sm:gap-3 sm:px-4">
             <span>Time</span>
             <span>Session</span>
@@ -159,11 +159,11 @@ export default function ClassScheduleSection({ onOpenAuth }) {
                     disabled={isBooked || isLoading}
                     onClick={() => handleBook(item, index)}
                     className={[
-                      'inline-flex min-h-[32px] cursor-pointer items-center justify-center px-3 text-[9px] font-bold uppercase tracking-[0.14em] transition',
+                      'inline-flex h-8 cursor-pointer items-center justify-center rounded-xl px-3 text-[10px] font-bold uppercase tracking-[0.14em] shadow-xs transition-all duration-200',
                       isBooked
-                        ? 'cursor-default bg-[#f1f2ed] text-[#719500]'
-                        : 'bg-[#10110f] text-white hover:bg-[#c8f31d] hover:text-[#10110f]',
-                      isLoading ? 'opacity-60 cursor-wait' : '',
+                        ? 'cursor-default border border-emerald-200 bg-emerald-50 text-emerald-800'
+                        : 'bg-[#10110f] text-white hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]',
+                      isLoading ? 'cursor-wait opacity-60' : '',
                     ].join(' ')}
                     aria-label={`Book ${item.name} at ${item.time}`}
                   >

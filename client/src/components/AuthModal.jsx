@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { CloseIcon } from './icons.jsx'
 
 const initialForm = {
   fullName: '',
@@ -98,7 +99,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#10110f]/75 px-5 py-8 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#10110f]/75 px-4 py-8 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -110,32 +111,32 @@ export default function AuthModal({ isOpen, onClose }) {
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         tabIndex="-1"
-        className="relative max-h-full w-full max-w-md overflow-y-auto bg-white p-7 shadow-2xl outline-none sm:p-10"
+        className="relative max-h-full w-full max-w-md overflow-y-auto rounded-2xl border border-[#e4e5df] bg-white p-6 shadow-2xl outline-none sm:p-9"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close authentication dialog"
-          className="absolute right-5 top-5 inline-flex h-9 w-9 cursor-pointer items-center justify-center text-2xl leading-none text-[#555750] transition hover:bg-[#f6f7f3] hover:text-[#10110f]"
+          className="absolute right-5 top-5 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-neutral-400 transition hover:bg-neutral-100 hover:text-[#10110f]"
         >
-          <span aria-hidden="true">&times;</span>
+          <CloseIcon className="h-4 w-4" />
         </button>
 
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#84ae00]">
           NRBFIT member access
         </p>
-        <h2 id="auth-modal-title" className="max-w-[12ch] font-[Barlow_Condensed] text-5xl font-extrabold leading-[0.88] tracking-[-0.05em] text-[#10110f]">
+        <h2 id="auth-modal-title" className="max-w-[12ch] font-[Barlow_Condensed] text-4xl font-extrabold leading-[0.9] tracking-[-0.05em] text-[#10110f] sm:text-5xl">
           {title}
         </h2>
-        <p className="mt-4 text-sm leading-6 text-[#555750]">
+        <p className="mt-3 text-xs leading-5 text-[#555750] sm:text-sm">
           {isSignUp ? 'Save your spot and keep your training moving.' : 'Sign in to manage your visits and bookings.'}
         </p>
 
-        <form className="mt-8 grid gap-3" onSubmit={handleSubmit} noValidate>
+        <form className="mt-6 grid gap-3.5" onSubmit={handleSubmit} noValidate>
           {isSignUp && (
-            <>
-              <label htmlFor="auth-full-name" className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
+            <div>
+              <label htmlFor="auth-full-name" className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
                 Full name
               </label>
               <input
@@ -144,43 +145,50 @@ export default function AuthModal({ isOpen, onClose }) {
                 value={form.fullName}
                 onChange={handleChange}
                 autoComplete="name"
-                className="min-h-[48px] border border-[#d8dad2] bg-white px-3 text-sm text-[#10110f] outline-none focus:border-[#84ae00] focus:ring-2 focus:ring-[#c8f31d]"
+                placeholder="e.g. Amani Odhiambo"
+                className="mt-1 min-h-[44px] w-full rounded-xl border border-[#d8dad2] bg-[#fbfbf9] px-3.5 text-sm text-[#10110f] outline-none transition-all duration-200 focus:border-[#84ae00] focus:bg-white focus:ring-2 focus:ring-[#84ae00]/25 shadow-2xs"
                 required
               />
-            </>
+            </div>
           )}
 
-          <label htmlFor="auth-email" className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
-            Email address
-          </label>
-          <input
-            id="auth-email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            autoComplete="email"
-            className="min-h-[48px] border border-[#d8dad2] bg-white px-3 text-sm text-[#10110f] outline-none focus:border-[#84ae00] focus:ring-2 focus:ring-[#c8f31d]"
-            required
-          />
+          <div>
+            <label htmlFor="auth-email" className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
+              Email address
+            </label>
+            <input
+              id="auth-email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              autoComplete="email"
+              placeholder="e.g. amani@example.com"
+              className="mt-1 min-h-[44px] w-full rounded-xl border border-[#d8dad2] bg-[#fbfbf9] px-3.5 text-sm text-[#10110f] outline-none transition-all duration-200 focus:border-[#84ae00] focus:bg-white focus:ring-2 focus:ring-[#84ae00]/25 shadow-2xs"
+              required
+            />
+          </div>
 
-          <label htmlFor="auth-password" className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
-            Password
-          </label>
-          <input
-            id="auth-password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            autoComplete={isSignUp ? 'new-password' : 'current-password'}
-            className="min-h-[48px] border border-[#d8dad2] bg-white px-3 text-sm text-[#10110f] outline-none focus:border-[#84ae00] focus:ring-2 focus:ring-[#c8f31d]"
-            required
-            minLength="6"
-          />
+          <div>
+            <label htmlFor="auth-password" className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
+              Password
+            </label>
+            <input
+              id="auth-password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              autoComplete={isSignUp ? 'new-password' : 'current-password'}
+              placeholder="At least 6 characters"
+              className="mt-1 min-h-[44px] w-full rounded-xl border border-[#d8dad2] bg-[#fbfbf9] px-3.5 text-sm text-[#10110f] outline-none transition-all duration-200 focus:border-[#84ae00] focus:bg-white focus:ring-2 focus:ring-[#84ae00]/25 shadow-2xs"
+              required
+              minLength="6"
+            />
+          </div>
 
           {(validationError || authError) && (
-            <p className="mt-2 text-sm font-semibold text-[#a33b2d]" role="alert">
+            <p className="mt-1 rounded-lg bg-red-50 p-2.5 text-xs font-semibold text-[#a33b2d]" role="alert">
               {validationError || authError}
             </p>
           )}
@@ -188,20 +196,20 @@ export default function AuthModal({ isOpen, onClose }) {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-4 inline-flex min-h-[50px] cursor-pointer items-center justify-center bg-[#10110f] px-5 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f] disabled:cursor-wait disabled:opacity-60"
+            className="mt-3 inline-flex h-11 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
           >
-            {submitting ? 'Please wait...' : isSignUp ? 'Create account' : 'Sign in'}
+            {submitting ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
           </button>
         </form>
 
-        <p className="mt-7 border-t border-[#e4e5df] pt-5 text-center text-sm text-[#555750]">
+        <p className="mt-6 border-t border-[#e4e5df] pt-4 text-center text-xs text-[#555750]">
           {isSignUp ? 'Already a member?' : 'New to NRBFIT?'}{' '}
           <button
             type="button"
             onClick={() => switchMode(isSignUp ? 'signin' : 'signup')}
             className="cursor-pointer font-bold text-[#719500] underline decoration-[#c8f31d] decoration-2 underline-offset-4 hover:text-[#10110f]"
           >
-            {isSignUp ? 'Sign in' : 'Create an account'}
+            {isSignUp ? 'Sign In' : 'Create an Account'}
           </button>
         </p>
       </section>

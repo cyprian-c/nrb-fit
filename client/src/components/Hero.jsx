@@ -1,5 +1,5 @@
 import studioImage from '../../assets/studio-hero.jpg'
-import { SparklesIcon } from './icons.jsx'
+import { SparklesIcon, ArrowRightIcon } from './icons.jsx'
 
 // Hero: keeps the original marketing message, proof stats, and CTA structure while using local studio imagery.
 export default function Hero() {
@@ -30,11 +30,12 @@ export default function Hero() {
         <div className="mt-7 flex flex-wrap items-center gap-4">
           <a
             href="#classes"
-            className="inline-flex items-center justify-center bg-[#10110f] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f]"
+            className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#10110f] px-5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
           >
-            Explore the schedule
+            <span>Explore the schedule</span>
+            <ArrowRightIcon className="h-3.5 w-3.5" />
           </a>
-          <p className="text-[10px] uppercase tracking-[0.14em] text-[#777a73]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#777a73]">
             Small-group coaching · Independent gym access
           </p>
         </div>
@@ -53,7 +54,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="relative min-h-[380px] overflow-hidden bg-[#f1f2ed] sm:min-h-[440px]">
+      <div className="relative min-h-[380px] overflow-hidden rounded-3xl bg-[#f1f2ed] shadow-md sm:min-h-[440px]">
         <img
           src={studioImage}
           alt="Strength training studio with free weights and equipment"
@@ -62,11 +63,11 @@ export default function Hero() {
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#10110f]/35 via-transparent to-transparent" aria-hidden="true" />
-        <div className="absolute right-4 top-5 flex h-24 w-24 flex-col justify-between bg-[#c8f31d] p-3 text-[11px] font-extrabold uppercase leading-[1.05] text-[#10110f]">
+        <div className="absolute right-4 top-5 flex h-24 w-24 flex-col justify-between rounded-2xl bg-[#c8f31d] p-3 text-[11px] font-extrabold uppercase leading-[1.05] text-[#10110f] shadow-sm">
           <span>Move<br />your<br />way</span>
           <SparklesIcon className="self-end h-5 w-5 text-[#10110f]" />
         </div>
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#10110f]/80 px-4 py-3 text-[8px] font-bold uppercase tracking-[0.14em] text-white">
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between rounded-b-3xl bg-[#10110f]/80 px-5 py-3 text-[9px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur-xs">
           <span>A little space to get a lot stronger.</span>
           <span className="text-[#c8f31d]">01 / 03</span>
         </div>

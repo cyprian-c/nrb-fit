@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { sendEnquiry } from '../api/client.js'
+import { ArrowRightIcon } from './icons.jsx'
 
 // ContactSection: handles direct database enquiry submission with fallback to mailto and WhatsApp.
 export default function ContactSection() {
@@ -76,8 +77,9 @@ export default function ContactSection() {
           </p>
 
           <div className="mt-8 border-t border-[#dfe1d9] pt-5">
-            <a href="mailto:hello@nrbfit.co.ke" className="inline-flex items-center text-sm font-bold text-[#10110f] transition hover:text-[#84ae00]">
-              hello@nrbfit.co.ke <span className="ml-2 text-[#719500]">↗</span>
+            <a href="mailto:hello@nrbfit.co.ke" className="group inline-flex items-center gap-1.5 text-sm font-bold text-[#10110f] transition hover:text-[#84ae00]">
+              <span>hello@nrbfit.co.ke</span>
+              <ArrowRightIcon className="h-3.5 w-3.5 text-[#719500] transition group-hover:translate-x-0.5" />
             </a>
             <p className="mt-3 text-[11px] leading-7 text-[#777a73]">
               Nairobi, Kenya
@@ -87,85 +89,97 @@ export default function ContactSection() {
           </div>
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmitApi} className="grid gap-3">
-          <label htmlFor="name" className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
-            Your name
-          </label>
-          <input
-            id="name"
-            name="name"
-            autoComplete="name"
-            placeholder="e.g. Amani Odhiambo"
-            className="min-h-[46px] border border-[#d8dad2] bg-white px-3 text-sm text-[#10110f] placeholder:text-[#a5a7a1] outline-none focus:ring-2 focus:ring-[#84ae00]"
-            required
-          />
+        {/* Rounded Card Enclosure for Form */}
+        <div className="rounded-2xl border border-[#e4e5df] bg-white p-6 shadow-xs sm:p-8">
+          <form ref={formRef} onSubmit={handleSubmitApi} className="grid gap-3.5">
+            <div>
+              <label htmlFor="name" className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
+                Your name
+              </label>
+              <input
+                id="name"
+                name="name"
+                autoComplete="name"
+                placeholder="e.g. Amani Odhiambo"
+                className="mt-1.5 min-h-[44px] w-full rounded-xl border border-[#d8dad2] bg-[#fbfbf9] px-3.5 text-sm text-[#10110f] placeholder:text-[#a5a7a1] outline-none transition-all duration-200 focus:border-[#84ae00] focus:bg-white focus:ring-2 focus:ring-[#84ae00]/25 shadow-2xs"
+                required
+              />
+            </div>
 
-          <label htmlFor="email" className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
-            Email address
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder="e.g. amani@example.com"
-            className="min-h-[46px] border border-[#d8dad2] bg-white px-3 text-sm text-[#10110f] placeholder:text-[#a5a7a1] outline-none focus:ring-2 focus:ring-[#84ae00]"
-            required
-          />
+            <div>
+              <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="e.g. amani@example.com"
+                className="mt-1.5 min-h-[44px] w-full rounded-xl border border-[#d8dad2] bg-[#fbfbf9] px-3.5 text-sm text-[#10110f] placeholder:text-[#a5a7a1] outline-none transition-all duration-200 focus:border-[#84ae00] focus:bg-white focus:ring-2 focus:ring-[#84ae00]/25 shadow-2xs"
+                required
+              />
+            </div>
 
-          <label htmlFor="interest" className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
-            What can we help with?
-          </label>
-          <select
-            id="interest"
-            name="interest"
-            defaultValue=""
-            className="min-h-[46px] border border-[#d8dad2] bg-white px-3 text-sm text-[#10110f] outline-none focus:ring-2 focus:ring-[#84ae00]"
-            required
-          >
-            <option value="" disabled>Select an enquiry</option>
-            <option value="Class booking">Class booking</option>
-            <option value="Independent gym access">Independent gym access</option>
-            <option value="Membership or class pack">Membership or class pack</option>
-            <option value="Personal training">Personal training</option>
-            <option value="Other">Other</option>
-          </select>
+            <div>
+              <label htmlFor="interest" className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
+                What can we help with?
+              </label>
+              <select
+                id="interest"
+                name="interest"
+                defaultValue=""
+                className="mt-1.5 min-h-[44px] w-full rounded-xl border border-[#d8dad2] bg-[#fbfbf9] px-3.5 text-sm text-[#10110f] outline-none transition-all duration-200 focus:border-[#84ae00] focus:bg-white focus:ring-2 focus:ring-[#84ae00]/25 shadow-2xs"
+                required
+              >
+                <option value="" disabled>Select an enquiry</option>
+                <option value="Class booking">Class booking</option>
+                <option value="Independent gym access">Independent gym access</option>
+                <option value="Membership or class pack">Membership or class pack</option>
+                <option value="Personal training">Personal training</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
 
-          <label htmlFor="message" className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
-            Message
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            rows="4"
-            placeholder="Tell us about your training goals or preferred time slots..."
-            className="min-h-[110px] border border-[#d8dad2] bg-white px-3 py-3 text-sm text-[#10110f] placeholder:text-[#a5a7a1] outline-none focus:ring-2 focus:ring-[#84ae00]"
-            required
-          />
+            <div>
+              <label htmlFor="message" className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f]">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows="4"
+                placeholder="Tell us about your training goals or preferred time slots..."
+                className="mt-1.5 min-h-[100px] w-full rounded-xl border border-[#d8dad2] bg-[#fbfbf9] p-3.5 text-sm text-[#10110f] placeholder:text-[#a5a7a1] outline-none transition-all duration-200 focus:border-[#84ae00] focus:bg-white focus:ring-2 focus:ring-[#84ae00]/25 shadow-2xs"
+                required
+              />
+            </div>
 
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex min-h-[50px] cursor-pointer items-center justify-center bg-[#10110f] px-6 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f] disabled:cursor-wait disabled:opacity-60"
-            >
-              {isSubmitting ? 'Sending...' : 'Send enquiry'}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAction('whatsapp')}
-              className="inline-flex min-h-[50px] cursor-pointer items-center justify-center border border-[#10110f] bg-white px-5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#10110f] transition hover:bg-[#f6f7f3]"
-            >
-              Continue on WhatsApp
-            </button>
-          </div>
+            {/* Sleek Buttons */}
+            <div className="mt-2 flex flex-col gap-2.5 sm:flex-row">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="inline-flex h-10 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+              >
+                {isSubmitting ? 'Sending...' : 'Send Enquiry'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAction('whatsapp')}
+                className="inline-flex h-10 cursor-pointer items-center justify-center rounded-xl border border-neutral-300 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
+              >
+                Continue on WhatsApp
+              </button>
+            </div>
 
-          {status && (
-            <p className="mt-2 text-xs font-semibold text-[#719500]" role="status">
-              {status}
-            </p>
-          )}
-        </form>
+            {status && (
+              <p className="mt-2 text-xs font-semibold text-[#719500]" role="status">
+                {status}
+              </p>
+            )}
+          </form>
+        </div>
       </div>
     </section>
   )

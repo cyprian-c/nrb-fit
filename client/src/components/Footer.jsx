@@ -1,3 +1,5 @@
+import { ArrowRightIcon } from './icons.jsx'
+
 // Footer: closes the page with the studio branding and the final direct enquiry link, matching the original NRBFIT footer design.
 export default function Footer() {
   return (
@@ -11,8 +13,12 @@ export default function Footer() {
           Personal training · strength coaching · small-group sessions
         </p>
 
-        <a href="#contact" className="justify-self-end text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-          Book a visit <span className="ml-2 text-[#c8f31d]">↗</span>
+        <a
+          href="#contact"
+          className="group inline-flex items-center gap-1 justify-self-start text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:text-[#c8f31d] md:justify-self-end"
+        >
+          <span>Book a visit</span>
+          <ArrowRightIcon className="h-3.5 w-3.5 text-[#c8f31d] transition group-hover:translate-x-0.5" />
         </a>
       </div>
 
