@@ -1,3 +1,5 @@
+import { FlameIcon, DumbbellIcon, ClockIcon, LightningIcon, CheckIcon } from '../icons.jsx'
+
 export default function TrainingStatsTab({ stats }) {
   const activeDaysSet = new Set(stats?.activeDays || [])
 
@@ -42,7 +44,7 @@ export default function TrainingStatsTab({ stats }) {
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
               Current Streak
             </span>
-            <span className="text-2xl">🔥</span>
+            <FlameIcon className="h-6 w-6 text-[#c8f31d]" />
           </div>
           <div className="mt-4">
             <p className="font-[Barlow_Condensed] text-4xl font-black text-[#10110f] sm:text-5xl">
@@ -57,7 +59,7 @@ export default function TrainingStatsTab({ stats }) {
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
               Total Workouts
             </span>
-            <span className="text-2xl">🏋️</span>
+            <DumbbellIcon className="h-6 w-6 text-[#10110f]" />
           </div>
           <div className="mt-4">
             <p className="font-[Barlow_Condensed] text-4xl font-black text-[#10110f] sm:text-5xl">
@@ -72,7 +74,7 @@ export default function TrainingStatsTab({ stats }) {
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
               Active Time
             </span>
-            <span className="text-2xl">⏱</span>
+            <ClockIcon className="h-6 w-6 text-neutral-600" />
           </div>
           <div className="mt-4">
             <p className="font-[Barlow_Condensed] text-4xl font-black text-[#10110f] sm:text-5xl">
@@ -87,7 +89,7 @@ export default function TrainingStatsTab({ stats }) {
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
               Est. Energy
             </span>
-            <span className="text-2xl">⚡</span>
+            <LightningIcon className="h-6 w-6 text-[#84ae00]" />
           </div>
           <div className="mt-4">
             <p className="font-[Barlow_Condensed] text-4xl font-black text-[#84ae00] sm:text-5xl">
@@ -133,8 +135,8 @@ export default function TrainingStatsTab({ stats }) {
               <span className="font-[Barlow_Condensed] text-lg font-bold leading-tight">
                 {day.dayOfMonth}
               </span>
-              <span className="mt-0.5 text-[8px] font-bold uppercase">
-                {day.isCompleted ? '✓ Done' : '-'}
+              <span className="mt-0.5 flex items-center justify-center text-[8px] font-bold uppercase">
+                {day.isCompleted ? <CheckIcon className="h-3 w-3" /> : '-'}
               </span>
             </div>
           ))}

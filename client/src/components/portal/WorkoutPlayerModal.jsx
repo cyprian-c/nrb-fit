@@ -6,6 +6,17 @@ import {
   playCelebrationChime,
 } from '../../utils/audioCues.js'
 import { logWorkoutSession } from '../../api/client.js'
+import {
+  VolumeUpIcon,
+  VolumeMuteIcon,
+  CloseIcon,
+  ClockIcon,
+  TrophyIcon,
+  SparklesIcon,
+  FlameIcon,
+  PlayIcon,
+  PauseIcon,
+} from '../icons.jsx'
 
 export default function WorkoutPlayerModal({
   isOpen,
@@ -207,13 +218,22 @@ export default function WorkoutPlayerModal({
               className="rounded-lg border border-neutral-700 bg-neutral-900/80 p-2 text-xs text-neutral-300 transition hover:bg-neutral-800"
               title={soundEnabled ? 'Mute Audio Cues' : 'Unmute Audio Cues'}
             >
-              {soundEnabled ? '🔊 Sound On' : '🔇 Muted'}
+              {soundEnabled ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <VolumeUpIcon className="h-3.5 w-3.5" /> Sound On
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5">
+                  <VolumeMuteIcon className="h-3.5 w-3.5" /> Muted
+                </span>
+              )}
             </button>
 
             {/* Total Duration Timer */}
             {(phase === 'exercise' || phase === 'rest') && (
-              <span className="rounded-lg bg-neutral-900 px-3 py-1.5 font-mono text-xs font-bold text-neutral-300">
-                ⏱ {formatTime(totalElapsed)}
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-1.5 font-mono text-xs font-bold text-neutral-300">
+                <ClockIcon className="h-3.5 w-3.5 text-neutral-400" />
+                {formatTime(totalElapsed)}
               </span>
             )}
 
@@ -223,7 +243,7 @@ export default function WorkoutPlayerModal({
               className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white"
               aria-label="Close workout player"
             >
-              ✕
+              <CloseIcon className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -275,9 +295,10 @@ export default function WorkoutPlayerModal({
               <button
                 type="button"
                 onClick={startWorkout}
-                className="mt-2 flex w-full cursor-pointer items-center justify-center rounded-xl bg-[#c8f31d] py-4 text-center font-[Barlow_Condensed] text-lg font-black uppercase tracking-wider text-[#10110f] transition hover:bg-[#b5dc15] active:scale-[0.99]"
+                className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#c8f31d] py-3.5 text-center font-[Barlow_Condensed] text-lg font-black uppercase tracking-wider text-[#10110f] transition hover:bg-[#b5dc15] active:scale-[0.99]"
               >
-                Start Workout Now 🔥
+                <span>Start Workout Now</span>
+                <FlameIcon className="h-5 w-5 text-[#10110f]" />
               </button>
             </div>
           )}
@@ -357,7 +378,10 @@ export default function WorkoutPlayerModal({
                         onClick={() => setIsPaused(!isPaused)}
                         className="rounded border border-neutral-700 bg-neutral-800 px-4 py-1 text-xs font-bold text-white hover:bg-neutral-700"
                       >
-                        {isPaused ? '▶ Resume' : '⏸ Pause'}
+                        <span className="inline-flex items-center gap-1.5">
+                          {isPaused ? <PlayIcon className="h-3 w-3" /> : <PauseIcon className="h-3 w-3" />}
+                          {isPaused ? 'Resume' : 'Pause'}
+                        </span>
                       </button>
                       <button
                         type="button"
@@ -386,9 +410,9 @@ export default function WorkoutPlayerModal({
                     {currentExercise.instructions}
                   </p>
                   {currentExercise.tips && (
-                    <p className="mt-2 text-[11px] text-[#c8f31d]/90">
-                      💡 <strong>Coach tip: </strong>
-                      {currentExercise.tips}
+                    <p className="mt-2 flex items-center gap-1.5 text-[11px] text-[#c8f31d]/90">
+                      <SparklesIcon className="h-3.5 w-3.5 shrink-0 text-[#c8f31d]" />
+                      <span><strong>Coach tip: </strong>{currentExercise.tips}</span>
                     </p>
                   )}
                 </div>
@@ -412,9 +436,14 @@ export default function WorkoutPlayerModal({
                 <button
                   type="button"
                   onClick={handleExerciseDone}
-                  className="flex flex-1 cursor-pointer items-center justify-center rounded-xl bg-[#c8f31d] py-3 text-center font-[Barlow_Condensed] text-base font-black uppercase tracking-wider text-[#10110f] transition hover:bg-[#b5dc15]"
+                  className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#c8f31d] py-3 text-center font-[Barlow_Condensed] text-base font-black uppercase tracking-wider text-[#10110f] transition hover:bg-[#b5dc15]"
                 >
-                  {currentIdx === exercises.length - 1 ? 'Finish Workout 🏆' : 'Done / Next Exercise →'}
+                  <span>{currentIdx === exercises.length - 1 ? 'Finish Workout' : 'Done / Next Exercise'}</span>
+                  {currentIdx === exercises.length - 1 ? (
+                    <TrophyIcon className="h-4 w-4 text-[#10110f]" />
+                  ) : (
+                    <span>→</span>
+                  )}
                 </button>
               </div>
             </div>
@@ -469,8 +498,8 @@ export default function WorkoutPlayerModal({
           {/* Phase 5: Workout Finished & Celebrations */}
           {phase === 'finished' && (
             <div className="flex flex-1 flex-col items-center justify-center gap-6 py-6 text-center">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#c8f31d]/20 text-5xl">
-                🏆
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#c8f31d]/20">
+                <TrophyIcon className="h-10 w-10 text-[#c8f31d]" />
               </div>
 
               <div>

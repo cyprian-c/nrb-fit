@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createBooking, fetchClasses } from '../api/client.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { classSchedule as fallbackClasses } from '../data/siteData'
+import { CheckIcon } from './icons.jsx'
 
 // ClassScheduleSection: keeps a real category filter in state, loads live data, and supports slot booking.
 export default function ClassScheduleSection({ onOpenAuth }) {
@@ -166,7 +167,15 @@ export default function ClassScheduleSection({ onOpenAuth }) {
                     ].join(' ')}
                     aria-label={`Book ${item.name} at ${item.time}`}
                   >
-                    {isLoading ? 'Booking...' : isBooked ? 'Booked ✓' : 'Book'}
+                    {isLoading ? (
+                      'Booking...'
+                    ) : isBooked ? (
+                      <span className="inline-flex items-center gap-1">
+                        Booked <CheckIcon className="h-3 w-3" />
+                      </span>
+                    ) : (
+                      'Book'
+                    )}
                   </button>
                 </div>
               </div>

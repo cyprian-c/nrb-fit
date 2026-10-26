@@ -85,7 +85,7 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
                   onClick={() => onSelectView && onSelectView('portal')}
                   className="inline-flex cursor-pointer items-center rounded-lg bg-[#c8f31d] px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#10110f] transition hover:bg-[#b8e314]"
                 >
-                  Member Portal ⚡
+                  Member Portal
                 </button>
               ) : (
                 <button

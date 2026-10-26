@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchProgramDetail, enrollProgram } from '../../api/client.js'
+import { CloseIcon, CheckIcon } from '../icons.jsx'
 
 export default function ProgramDetailModal({
   isOpen,
@@ -84,7 +85,7 @@ export default function ProgramDetailModal({
             className="rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-black"
             aria-label="Close modal"
           >
-            ✕
+            <CloseIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -176,7 +177,7 @@ export default function ProgramDetailModal({
                                     : 'bg-neutral-100 text-neutral-500'
                               }`}
                             >
-                              {isSessionCompleted ? '✓' : `D${session.day_number}`}
+                              {isSessionCompleted ? <CheckIcon className="h-4 w-4" /> : `D${session.day_number}`}
                             </span>
                             <div>
                               <div className="flex items-center gap-2">

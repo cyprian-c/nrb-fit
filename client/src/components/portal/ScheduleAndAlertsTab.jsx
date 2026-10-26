@@ -1,3 +1,5 @@
+import { CalendarIcon, TrophyIcon, RocketIcon, BellIcon, CloseIcon } from '../icons.jsx'
+
 export default function ScheduleAndAlertsTab({
   bookings,
   enrollments,
@@ -41,10 +43,16 @@ export default function ScheduleAndAlertsTab({
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 flex-col items-center justify-center rounded-lg bg-[#f0f1ec] font-[Barlow_Condensed] text-xs font-bold text-[#10110f]">
-                      <span>{b.booking_date ? new Date(b.booking_date).getDate() : '📅'}</span>
-                      <span className="text-[9px] uppercase text-neutral-500">
-                        {b.booking_date ? new Date(b.booking_date).toLocaleDateString('en-US', { month: 'short' }) : 'Day'}
-                      </span>
+                      {b.booking_date ? (
+                        <>
+                          <span>{new Date(b.booking_date).getDate()}</span>
+                          <span className="text-[9px] uppercase text-neutral-500">
+                            {new Date(b.booking_date).toLocaleDateString('en-US', { month: 'short' })}
+                          </span>
+                        </>
+                      ) : (
+                        <CalendarIcon className="h-4 w-4 text-neutral-500" />
+                      )}
                     </div>
                     <div>
                       <h4 className="font-[Barlow_Condensed] text-lg font-bold uppercase text-[#10110f]">
@@ -147,14 +155,16 @@ export default function ScheduleAndAlertsTab({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2.5">
-                      <span className="mt-0.5 text-base">
-                        {alert.type === 'workout_completed'
-                          ? '🏆'
-                          : alert.type === 'program_enrolled'
-                            ? '🚀'
-                            : alert.type === 'class_reminder'
-                              ? '🗓'
-                              : '🔔'}
+                      <span className="mt-0.5 text-neutral-800">
+                        {alert.type === 'workout_completed' ? (
+                          <TrophyIcon className="h-4 w-4 text-[#84ae00]" />
+                        ) : alert.type === 'program_enrolled' ? (
+                          <RocketIcon className="h-4 w-4 text-[#84ae00]" />
+                        ) : alert.type === 'class_reminder' ? (
+                          <CalendarIcon className="h-4 w-4 text-[#84ae00]" />
+                        ) : (
+                          <BellIcon className="h-4 w-4 text-[#84ae00]" />
+                        )}
                       </span>
                       <div>
                         <h4 className="font-semibold text-xs text-[#10110f]">
@@ -170,10 +180,11 @@ export default function ScheduleAndAlertsTab({
                       <button
                         type="button"
                         onClick={() => onMarkAlertRead(alert.id)}
-                        className="cursor-pointer text-[10px] font-bold text-neutral-400 hover:text-black"
+                        className="cursor-pointer text-neutral-400 hover:text-black p-0.5"
                         title="Dismiss"
+                        aria-label="Dismiss alert"
                       >
-                        ✕
+                        <CloseIcon className="h-3.5 w-3.5" />
                       </button>
                     )}
                   </div>

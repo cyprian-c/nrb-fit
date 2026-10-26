@@ -1,4 +1,5 @@
 import { useAuth } from '../../context/AuthContext.jsx'
+import { FlameIcon, BellIcon } from '../icons.jsx'
 
 export default function PortalOverviewTab({
   stats,
@@ -41,7 +42,7 @@ export default function PortalOverviewTab({
 
           {/* Quick Streak Highlight */}
           <div className="flex items-center gap-4 rounded-xl border border-neutral-800 bg-neutral-900/80 p-4 backdrop-blur-sm sm:px-6">
-            <span className="text-4xl">🔥</span>
+            <FlameIcon className="h-8 w-8 text-[#c8f31d]" />
             <div>
               <p className="font-[Barlow_Condensed] text-3xl font-extrabold leading-none text-[#c8f31d]">
                 {stats?.currentStreak || 0}
@@ -63,7 +64,7 @@ export default function PortalOverviewTab({
               className="flex items-center justify-between gap-4 rounded-xl border border-[#c8f31d]/40 bg-[#c8f31d]/10 px-4 py-3 text-xs text-[#10110f]"
             >
               <div className="flex items-center gap-2.5">
-                <span className="text-base">🔔</span>
+                <BellIcon className="h-4 w-4 text-[#84ae00] shrink-0" />
                 <div>
                   <strong className="font-semibold">{alert.title}</strong>
                   <span className="mx-1.5 text-neutral-400">·</span>

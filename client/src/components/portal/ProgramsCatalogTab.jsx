@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CalendarIcon, ClockIcon, LightningIcon } from '../icons.jsx'
 
 export default function ProgramsCatalogTab({
   programs,
@@ -96,9 +97,15 @@ export default function ProgramsCatalogTab({
                 </p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] font-semibold text-neutral-500">
-                  <span>📅 {prog.duration_days} Days Total</span>
-                  <span>⏱ 15–25 min/day</span>
-                  <span>⚡ {prog.session_count || 28} Routines</span>
+                  <span className="inline-flex items-center gap-1">
+                    <CalendarIcon className="h-3.5 w-3.5 text-neutral-400" /> {prog.duration_days} Days Total
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <ClockIcon className="h-3.5 w-3.5 text-neutral-400" /> 15–25 min/day
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <LightningIcon className="h-3.5 w-3.5 text-[#84ae00]" /> {prog.session_count || 28} Routines
+                  </span>
                 </div>
               </div>
 

@@ -1,4 +1,5 @@
 import studioImage from '../../assets/studio-hero.jpg'
+import { SparklesIcon } from './icons.jsx'
 
 // Hero: keeps the original marketing message, proof stats, and CTA structure while using local studio imagery.
 export default function Hero() {
@@ -63,7 +64,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#10110f]/35 via-transparent to-transparent" aria-hidden="true" />
         <div className="absolute right-4 top-5 flex h-24 w-24 flex-col justify-between bg-[#c8f31d] p-3 text-[11px] font-extrabold uppercase leading-[1.05] text-[#10110f]">
           <span>Move<br />your<br />way</span>
-          <span className="self-end text-2xl" aria-hidden="true">✳</span>
+          <SparklesIcon className="self-end h-5 w-5 text-[#10110f]" />
         </div>
         <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#10110f]/80 px-4 py-3 text-[8px] font-bold uppercase tracking-[0.14em] text-white">
           <span>A little space to get a lot stronger.</span>
