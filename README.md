@@ -1,4 +1,4 @@
-# NRBFIT Fitness Studio — Full-Stack Platform
+# NRBFIT Fitness Studio
 
 NRBFIT is a modern full-stack web application designed for a Nairobi fitness studio. The platform provides an interactive class schedule, coaching roster, membership packages, member authentication with session cookies, class slot reservations, and database-persisted customer enquiries.
 
