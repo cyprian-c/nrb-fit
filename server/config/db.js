@@ -1,11 +1,19 @@
 import dotenv from 'dotenv'
 import { neon } from '@neondatabase/serverless'
+import path from 'node:path'
 import pg from 'pg'
+import { fileURLToPath } from 'node:url'
 
-// Local development may keep .env at the server workspace or repository root,
-// while deployed environments provide DATABASE_URL directly at process level.
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+// Robustly load .env across workspace root, server dir, and process environment
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
+if (process.env.DOTENV_CONFIG_PATH) {
+  dotenv.config({ path: process.env.DOTENV_CONFIG_PATH })
+}
 dotenv.config()
-dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '../.env' })
 
 const { Pool } = pg
 const databaseUrl = process.env.DATABASE_URL
@@ -24,6 +32,12 @@ export const pool = databaseUrl
       allowExitOnIdle: true,
     })
   : null
+
+if (pool) {
+  pool.on('error', (err) => {
+    console.error('[db] Unexpected pool error on idle client:', err)
+  })
+}
 
 // Execute one parameterized HTTP query at a time and return a pg-shaped result
 // so existing controllers do not need to know which Neon transport is used.

@@ -31,8 +31,12 @@ if (!process.env.JWT_SECRET) {
     : 'nrbfit_jwt_session_secret_development_fallback_key'
 }
 
+if (typeof PhusionPassenger !== 'undefined') {
+  PhusionPassenger.configure({ autoInstall: false })
+}
+
 const app = express()
-const rawPort = process.env.PORT || 5000
+const rawPort = process.env.PORT || (typeof PhusionPassenger !== 'undefined' ? 'passenger' : 5000)
 const port = isNaN(Number(rawPort)) ? rawPort : Number(rawPort)
 const configuredOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .split(',')
@@ -133,13 +137,9 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('[server] Unhandled Rejection at:', promise, 'reason:', reason)
 })
 
-const server = typeof port === 'string'
-  ? app.listen(port, () => {
-      console.info(`[server] NRBFIT API listening on socket ${port}`)
-    })
-  : app.listen(port, () => {
-      console.info(`[server] NRBFIT API listening on port ${port}`)
-    })
+const server = app.listen(port, () => {
+  console.info(`[server] NRBFIT API listening on ${port}`)
+})
 
 server.on('error', (error) => {
   console.error('[server] Server listen error:', error)

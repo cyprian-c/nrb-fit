@@ -149,21 +149,10 @@ fi
 # 7. Install production-only dependencies safely (never build on the server)
 export NODE_OPTIONS="--max-old-space-size=512"
 
-NEED_INSTALL=false
-if [ ! -d "node_modules/express" ] || [ ! -d "node_modules/@neondatabase/serverless" ]; then
-  NEED_INSTALL=true
-elif [ "$TARGET_DIR/package.json" -nt "$TARGET_DIR/node_modules" ]; then
-  NEED_INSTALL=true
-fi
-
-if [ "$NEED_INSTALL" = true ]; then
-  echo "--> Installing production runtime dependencies (--omit=dev)..."
-  npm install --omit=dev --no-audit --no-fund --prefer-offline || {
-    echo "--> [WARN] npm install exited with warnings; checking required runtime modules..."
-  }
-else
-  echo "--> Production dependencies already present and up to date."
-fi
+echo "--> Installing & verifying production runtime dependencies (--omit=dev)..."
+npm install --omit=dev --no-audit --no-fund --prefer-offline || {
+  echo "--> [WARN] npm install exited with warnings; checking required runtime modules..."
+}
 
 # 8. Verify pre-built frontend distribution
 if [ -f "$TARGET_DIR/client/dist/index.html" ]; then

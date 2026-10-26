@@ -4,6 +4,7 @@ PassengerBaseURI "/"
 PassengerNodejs "/home/dreaifwi/nodevenv/nrbfit.cyprian.services/20/bin/node"
 PassengerAppType node
 PassengerStartupFile app.js
+PassengerFriendlyErrorPages on
 # DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
 
 # Prevent directory indexing
