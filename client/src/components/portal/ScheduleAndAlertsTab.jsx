@@ -105,7 +105,7 @@ export default function ScheduleAndAlertsTab({
                   <button
                     type="button"
                     onClick={() => onOpenProgram(enr.slug)}
-                    className="cursor-pointer rounded-lg bg-[#10110f] px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#c8f31d] hover:text-[#10110f]"
+                    className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#10110f] px-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
                   >
                     Open Day {enr.current_day} →
                   </button>
@@ -180,7 +180,7 @@ export default function ScheduleAndAlertsTab({
                       <button
                         type="button"
                         onClick={() => onMarkAlertRead(alert.id)}
-                        className="cursor-pointer text-neutral-400 hover:text-black p-0.5"
+                        className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
                         title="Dismiss"
                         aria-label="Dismiss alert"
                       >

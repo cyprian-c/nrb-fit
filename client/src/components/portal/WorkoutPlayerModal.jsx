@@ -215,7 +215,7 @@ export default function WorkoutPlayerModal({
             <button
               type="button"
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className="rounded-lg border border-neutral-700 bg-neutral-900/80 p-2 text-xs text-neutral-300 transition hover:bg-neutral-800"
+              className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xl border border-neutral-700 bg-neutral-900/80 px-3 text-xs font-semibold text-neutral-300 shadow-2xs transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800"
               title={soundEnabled ? 'Mute Audio Cues' : 'Unmute Audio Cues'}
             >
               {soundEnabled ? (
@@ -231,7 +231,7 @@ export default function WorkoutPlayerModal({
 
             {/* Total Duration Timer */}
             {(phase === 'exercise' || phase === 'rest') && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-1.5 font-mono text-xs font-bold text-neutral-300">
+              <span className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-neutral-800 bg-neutral-900 px-3 font-mono text-xs font-bold text-neutral-300">
                 <ClockIcon className="h-3.5 w-3.5 text-neutral-400" />
                 {formatTime(totalElapsed)}
               </span>
@@ -240,7 +240,7 @@ export default function WorkoutPlayerModal({
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900/60 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
               aria-label="Close workout player"
             >
               <CloseIcon className="h-4 w-4" />
@@ -295,10 +295,10 @@ export default function WorkoutPlayerModal({
               <button
                 type="button"
                 onClick={startWorkout}
-                className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#c8f31d] py-3.5 text-center font-[Barlow_Condensed] text-lg font-black uppercase tracking-wider text-[#10110f] transition hover:bg-[#b5dc15] active:scale-[0.99]"
+                className="mt-2 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#c8f31d] px-5 font-[Barlow_Condensed] text-base font-black uppercase tracking-wider text-[#10110f] shadow-xs transition-all duration-200 hover:bg-[#b5dc15] active:scale-[0.98]"
               >
                 <span>Start Workout Now</span>
-                <FlameIcon className="h-5 w-5 text-[#10110f]" />
+                <FlameIcon className="h-4 w-4 text-[#10110f]" />
               </button>
             </div>
           )}
@@ -369,24 +369,22 @@ export default function WorkoutPlayerModal({
                       <button
                         type="button"
                         onClick={() => setSecondsLeft((s) => Math.max(0, s - 5))}
-                        className="rounded border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                        className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 px-3 text-xs font-semibold text-neutral-400 shadow-2xs transition-all duration-200 hover:border-neutral-700 hover:bg-neutral-800 hover:text-white active:scale-[0.98]"
                       >
                         -5s
                       </button>
                       <button
                         type="button"
                         onClick={() => setIsPaused(!isPaused)}
-                        className="rounded border border-neutral-700 bg-neutral-800 px-4 py-1 text-xs font-bold text-white hover:bg-neutral-700"
+                        className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-neutral-700 bg-neutral-800 px-4 text-xs font-bold text-white shadow-2xs transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-700 active:scale-[0.98]"
                       >
-                        <span className="inline-flex items-center gap-1.5">
-                          {isPaused ? <PlayIcon className="h-3 w-3" /> : <PauseIcon className="h-3 w-3" />}
-                          {isPaused ? 'Resume' : 'Pause'}
-                        </span>
+                        {isPaused ? <PlayIcon className="h-3 w-3" /> : <PauseIcon className="h-3 w-3" />}
+                        <span>{isPaused ? 'Resume' : 'Pause'}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setSecondsLeft((s) => s + 5)}
-                        className="rounded border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                        className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 px-3 text-xs font-semibold text-neutral-400 shadow-2xs transition-all duration-200 hover:border-neutral-700 hover:bg-neutral-800 hover:text-white active:scale-[0.98]"
                       >
                         +5s
                       </button>
@@ -428,7 +426,7 @@ export default function WorkoutPlayerModal({
                     const prevEx = exercises[currentIdx - 1]
                     setSecondsLeft(prevEx?.duration_seconds || 0)
                   }}
-                  className="rounded-lg border border-neutral-800 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral-400 disabled:opacity-30 hover:bg-neutral-800 hover:text-white"
+                  className="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 px-4 text-xs font-bold uppercase tracking-wider text-neutral-400 shadow-xs transition-all duration-200 disabled:opacity-30 hover:border-neutral-700 hover:bg-neutral-800 hover:text-white active:scale-[0.98]"
                 >
                   ← Prev
                 </button>
@@ -436,7 +434,7 @@ export default function WorkoutPlayerModal({
                 <button
                   type="button"
                   onClick={handleExerciseDone}
-                  className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#c8f31d] py-3 text-center font-[Barlow_Condensed] text-base font-black uppercase tracking-wider text-[#10110f] transition hover:bg-[#b5dc15]"
+                  className="inline-flex h-9 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#c8f31d] px-5 font-[Barlow_Condensed] text-sm font-black uppercase tracking-wider text-[#10110f] shadow-xs transition-all duration-200 hover:bg-[#b5dc15] active:scale-[0.98]"
                 >
                   <span>{currentIdx === exercises.length - 1 ? 'Finish Workout' : 'Done / Next Exercise'}</span>
                   {currentIdx === exercises.length - 1 ? (
@@ -464,14 +462,14 @@ export default function WorkoutPlayerModal({
                 <button
                   type="button"
                   onClick={addRest20}
-                  className="rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-neutral-700"
+                  className="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl border border-neutral-700 bg-neutral-800 px-4 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all duration-200 hover:bg-neutral-700 active:scale-[0.98]"
                 >
                   +20s Rest
                 </button>
                 <button
                   type="button"
                   onClick={skipRest}
-                  className="rounded-lg bg-[#c8f31d] px-6 py-2 text-xs font-black uppercase tracking-wider text-[#10110f] hover:bg-[#b5dc15]"
+                  className="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-[#c8f31d] px-5 text-xs font-black uppercase tracking-wider text-[#10110f] shadow-xs transition-all duration-200 hover:bg-[#b5dc15] active:scale-[0.98]"
                 >
                   Skip Rest →
                 </button>
@@ -550,7 +548,7 @@ export default function WorkoutPlayerModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full max-w-md cursor-pointer rounded-xl bg-[#c8f31d] py-3.5 font-[Barlow_Condensed] text-base font-black uppercase tracking-wider text-[#10110f] transition hover:bg-[#b5dc15]"
+                className="inline-flex h-11 w-full max-w-md cursor-pointer items-center justify-center rounded-xl bg-[#c8f31d] px-5 font-[Barlow_Condensed] text-sm font-black uppercase tracking-wider text-[#10110f] shadow-xs transition-all duration-200 hover:bg-[#b5dc15] active:scale-[0.98]"
               >
                 Back to Member Portal
               </button>

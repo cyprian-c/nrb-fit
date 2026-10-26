@@ -51,10 +51,10 @@ export default function ProgramsCatalogTab({
               key={cat.id}
               type="button"
               onClick={() => setSelectedCategory(cat.id)}
-              className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${
+              className={`inline-flex h-8 cursor-pointer items-center justify-center rounded-xl px-3 text-[10px] font-bold uppercase tracking-[0.14em] shadow-2xs transition-all duration-200 active:scale-[0.98] ${
                 selectedCategory === cat.id
-                  ? 'bg-[#10110f] text-white'
-                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  ? 'border border-[#10110f] bg-[#10110f] text-white shadow-xs'
+                  : 'border border-[#e4e5df] bg-white text-[#10110f] hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f]'
               }`}
             >
               {cat.label}
@@ -120,7 +120,7 @@ export default function ProgramsCatalogTab({
                     <button
                       type="button"
                       onClick={() => onOpenProgram(prog.slug)}
-                      className="cursor-pointer rounded-lg bg-[#10110f] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#c8f31d] hover:text-[#10110f]"
+                      className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#10110f] px-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
                     >
                       Continue Day {enrollment.current_day} →
                     </button>
@@ -129,7 +129,7 @@ export default function ProgramsCatalogTab({
                   <button
                     type="button"
                     onClick={() => onOpenProgram(prog.slug)}
-                    className="w-full cursor-pointer rounded-lg border border-neutral-300 bg-white py-2.5 text-center text-xs font-bold uppercase tracking-wider text-[#10110f] transition hover:border-black hover:bg-neutral-50"
+                    className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-4 text-xs font-bold uppercase tracking-wider text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#10110f] hover:bg-neutral-50 active:scale-[0.98]"
                   >
                     View Program Schedule & Enroll →
                   </button>

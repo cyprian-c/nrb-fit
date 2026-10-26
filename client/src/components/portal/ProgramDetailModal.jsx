@@ -82,7 +82,7 @@ export default function ProgramDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-black"
+            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-black"
             aria-label="Close modal"
           >
             <CloseIcon className="h-5 w-5" />
@@ -139,7 +139,7 @@ export default function ProgramDetailModal({
                     type="button"
                     disabled={enrolling}
                     onClick={handleEnroll}
-                    className="cursor-pointer rounded-lg bg-[#10110f] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#c8f31d] hover:text-[#10110f]"
+                    className="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#10110f] px-4 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] disabled:opacity-50"
                   >
                     {enrolling ? 'Enrolling...' : 'Enroll Free'}
                   </button>
@@ -202,10 +202,10 @@ export default function ProgramDetailModal({
                               onClose()
                               onStartSession(session, program)
                             }}
-                            className={`cursor-pointer rounded-lg px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition ${
+                            className={`inline-flex h-8 cursor-pointer items-center justify-center gap-1 rounded-xl px-3.5 text-xs font-bold uppercase tracking-wider shadow-xs transition-all duration-200 active:scale-[0.98] ${
                               isSessionCurrent
                                 ? 'bg-[#10110f] text-white hover:bg-[#c8f31d] hover:text-[#10110f]'
-                                : 'border border-neutral-300 bg-white text-neutral-800 hover:border-black hover:bg-neutral-50'
+                                : 'border border-neutral-300 bg-white text-neutral-800 hover:border-[#10110f] hover:bg-neutral-50'
                             }`}
                           >
                             Start Workout →

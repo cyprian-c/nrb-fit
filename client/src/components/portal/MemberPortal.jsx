@@ -124,7 +124,7 @@ export default function MemberPortal({ onBackToStudio }) {
         <button
           type="button"
           onClick={onBackToStudio}
-          className="inline-flex cursor-pointer items-center gap-2 self-start rounded-lg border border-neutral-300 bg-white px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-[#10110f] transition hover:border-black hover:bg-neutral-50"
+          className="inline-flex h-8 cursor-pointer items-center gap-1.5 self-start rounded-xl border border-neutral-300 bg-white px-3 text-xs font-bold uppercase tracking-wider text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
         >
           ← Return to Studio Overview
         </button>
@@ -137,15 +137,15 @@ export default function MemberPortal({ onBackToStudio }) {
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`relative cursor-pointer rounded-xl px-4 py-2.5 font-[Barlow_Condensed] text-base font-bold uppercase tracking-wider transition ${
+            className={`relative inline-flex h-9 cursor-pointer items-center rounded-xl px-4 font-[Barlow_Condensed] text-sm font-bold uppercase tracking-wider shadow-2xs transition-all duration-200 ${
               activeTab === tab.id
-                ? 'bg-[#10110f] text-white shadow-sm'
-                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black'
+                ? 'bg-[#10110f] text-white shadow-xs'
+                : 'bg-neutral-100 text-neutral-600 hover:bg-[#c8f31d] hover:text-[#10110f]'
             }`}
           >
             {tab.label}
             {tab.badge && (
-              <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#84ae00] text-[10px] font-black text-white">
+              <span className="ml-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#84ae00] text-[9px] font-black text-white">
                 {tab.badge}
               </span>
             )}

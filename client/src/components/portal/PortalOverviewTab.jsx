@@ -167,7 +167,7 @@ export default function PortalOverviewTab({
               <button
                 type="button"
                 onClick={() => onOpenProgram(activeEnrollment.slug)}
-                className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-6 py-3.5 font-[Barlow_Condensed] text-base font-bold uppercase tracking-wider text-white transition hover:bg-[#c8f31d] hover:text-[#10110f]"
+                className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#10110f] px-4 font-[Barlow_Condensed] text-sm font-bold uppercase tracking-wider text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
               >
                 Launch Day {nextSessionNumber} Workout →
               </button>
@@ -175,7 +175,7 @@ export default function PortalOverviewTab({
               <button
                 type="button"
                 onClick={() => onNavigateTab('programs')}
-                className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-6 py-3.5 font-[Barlow_Condensed] text-base font-bold uppercase tracking-wider text-white transition hover:bg-[#c8f31d] hover:text-[#10110f]"
+                className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#10110f] px-4 font-[Barlow_Condensed] text-sm font-bold uppercase tracking-wider text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
               >
                 Explore Programs Catalog →
               </button>
@@ -267,7 +267,7 @@ export default function PortalOverviewTab({
             <button
               type="button"
               onClick={() => onNavigateTab('programs')}
-              className="mt-4 inline-flex items-center rounded-lg bg-[#10110f] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#c8f31d] hover:text-[#10110f]"
+              className="mt-4 inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-4 text-xs font-bold uppercase tracking-wider text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
             >
               Browse Programs
             </button>
