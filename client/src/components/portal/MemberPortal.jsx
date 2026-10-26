@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import {
   fetchPortalStats,
   fetchMyEnrollments,
@@ -11,8 +11,9 @@ import PortalOverviewTab from './PortalOverviewTab.jsx'
 import ProgramsCatalogTab from './ProgramsCatalogTab.jsx'
 import TrainingStatsTab from './TrainingStatsTab.jsx'
 import ScheduleAndAlertsTab from './ScheduleAndAlertsTab.jsx'
-import ProgramDetailModal from './ProgramDetailModal.jsx'
-import WorkoutPlayerModal from './WorkoutPlayerModal.jsx'
+
+const ProgramDetailModal = lazy(() => import('./ProgramDetailModal.jsx'))
+const WorkoutPlayerModal = lazy(() => import('./WorkoutPlayerModal.jsx'))
 
 export default function MemberPortal({ onBackToStudio }) {
   const [activeTab, setActiveTab] = useState('overview') // 'overview' | 'programs' | 'stats' | 'schedule'
@@ -193,28 +194,33 @@ export default function MemberPortal({ onBackToStudio }) {
         </>
       )}
 
-      {/* Program Detail Modal */}
-      <ProgramDetailModal
-        isOpen={Boolean(selectedProgramSlug)}
-        programSlug={selectedProgramSlug}
-        enrollment={activeEnrollmentForSelected}
-        onClose={() => setSelectedProgramSlug(null)}
-        onStartSession={handleStartSession}
-        onEnrollmentChanged={triggerRefresh}
-      />
+      {/* Lazy Modals */}
+      <Suspense fallback={null}>
+        {selectedProgramSlug && (
+          <ProgramDetailModal
+            isOpen={Boolean(selectedProgramSlug)}
+            programSlug={selectedProgramSlug}
+            enrollment={activeEnrollmentForSelected}
+            onClose={() => setSelectedProgramSlug(null)}
+            onStartSession={handleStartSession}
+            onEnrollmentChanged={triggerRefresh}
+          />
+        )}
 
-      {/* Guided Workout Player Modal */}
-      <WorkoutPlayerModal
-        key={workoutSession?.id || 'none'}
-        isOpen={Boolean(workoutSession)}
-        session={workoutSession}
-        program={workoutProgram}
-        onClose={() => {
-          setWorkoutSession(null)
-          setWorkoutProgram(null)
-        }}
-        onWorkoutCompleted={handleWorkoutCompleted}
-      />
+        {workoutSession && (
+          <WorkoutPlayerModal
+            key={workoutSession?.id || 'none'}
+            isOpen={Boolean(workoutSession)}
+            session={workoutSession}
+            program={workoutProgram}
+            onClose={() => {
+              setWorkoutSession(null)
+              setWorkoutProgram(null)
+            }}
+            onWorkoutCompleted={handleWorkoutCompleted}
+          />
+        )}
+      </Suspense>
     </div>
   )
 }
