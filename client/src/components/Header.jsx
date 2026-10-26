@@ -1,6 +1,6 @@
 import { useAuth } from '../context/AuthContext.jsx'
 
-// Header: keeps the studio branding, in-page navigation, and authentication state anchored.
+// Header: sleek athletic branding, responsive view switching, and accent-hover interactions.
 export default function Header({ onOpenAuth, currentView = 'studio', onSelectView }) {
   const { user, logout } = useAuth()
 
@@ -15,27 +15,28 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
     : 'M'
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#e4e5df] bg-white/95 px-6 py-4 backdrop-blur-sm sm:px-10 lg:px-20">
+    <header className="sticky top-0 z-40 border-b border-[#e4e5df] bg-white/95 px-4 py-3.5 backdrop-blur-md sm:px-8 lg:px-16 transition-all">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
+        {/* Brand & View Switcher */}
+        <div className="flex items-center gap-5 sm:gap-6">
           <button
             type="button"
             onClick={() => onSelectView && onSelectView('studio')}
-            className="cursor-pointer font-[Barlow_Condensed] text-3xl font-extrabold tracking-tight text-[#10110f]"
+            className="group cursor-pointer font-[Barlow_Condensed] text-2xl font-black tracking-tight text-[#10110f] transition sm:text-3xl"
           >
-            NRBFIT<span className="text-[#84ae00]">.</span>
+            NRBFIT<span className="text-[#84ae00] transition group-hover:text-[#c8f31d]">.</span>
           </button>
 
-          {/* View Indicator Badge */}
+          {/* Studio / Portal Pill Switcher */}
           {user && (
-            <div className="hidden rounded-full border border-neutral-200 bg-neutral-100 p-0.5 sm:inline-flex">
+            <div className="hidden rounded-full border border-neutral-200/80 bg-neutral-100/90 p-1 sm:inline-flex shadow-xs">
               <button
                 type="button"
                 onClick={() => onSelectView && onSelectView('studio')}
-                className={`cursor-pointer rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+                className={`cursor-pointer rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                   currentView === 'studio'
-                    ? 'bg-[#10110f] text-white'
-                    : 'text-neutral-600 hover:text-black'
+                    ? 'bg-[#10110f] text-white shadow-xs'
+                    : 'text-neutral-600 hover:bg-[#c8f31d] hover:text-[#10110f]'
                 }`}
               >
                 Studio
@@ -43,10 +44,10 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
               <button
                 type="button"
                 onClick={() => onSelectView && onSelectView('portal')}
-                className={`cursor-pointer rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+                className={`cursor-pointer rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                   currentView === 'portal'
-                    ? 'bg-[#10110f] text-white'
-                    : 'text-neutral-600 hover:text-black'
+                    ? 'bg-[#10110f] text-white shadow-xs'
+                    : 'text-neutral-600 hover:bg-[#c8f31d] hover:text-[#10110f]'
                 }`}
               >
                 Member Portal
@@ -55,35 +56,53 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
           )}
         </div>
 
+        {/* Studio Navigation Links with sleek accent hover underline */}
         {currentView === 'studio' && (
-          <nav className="hidden items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#10110f] md:flex" aria-label="Main navigation">
-            <a href="#classes" className="transition hover:opacity-70">Classes</a>
-            <a href="#programs-teaser" className="transition hover:opacity-70">Home Programs</a>
-            <a href="#coaches" className="transition hover:opacity-70">Coaches</a>
-            <a href="#memberships" className="transition hover:opacity-70">Packages</a>
-            <a href="#contact" className="transition hover:opacity-70">Contact</a>
+          <nav
+            className="hidden items-center gap-7 text-[11px] font-bold uppercase tracking-[0.16em] text-[#10110f]/80 md:flex"
+            aria-label="Main navigation"
+          >
+            {[
+              { href: '#classes', label: 'Classes' },
+              { href: '#programs-teaser', label: 'Home Programs' },
+              { href: '#coaches', label: 'Coaches' },
+              { href: '#memberships', label: 'Packages' },
+              { href: '#contact', label: 'Contact' },
+            ].map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="group relative py-1 transition-colors hover:text-[#10110f]"
+              >
+                {link.label}
+                <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-[#c8f31d] transition-all duration-200 group-hover:w-full" />
+              </a>
+            ))}
           </nav>
         )}
 
-        <div className="flex items-center gap-3">
+        {/* Action Controls */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
           {user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              {/* Member Avatar */}
               <div
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#c8f31d] font-[Barlow_Condensed] text-sm font-bold text-[#10110f]"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-[#c8f31d] font-[Barlow_Condensed] text-xs font-bold text-[#10110f] shadow-xs ring-1 ring-black/5"
                 title={user.full_name || user.email}
               >
                 {initials}
               </div>
+
               <span className="hidden text-[11px] font-bold uppercase tracking-[0.12em] text-[#10110f] lg:inline">
-                Hi, {firstName}
+                {firstName}
               </span>
 
-              {/* View Switch Button for Mobile / Quick Access */}
+              {/* View Switch Button for Mobile / Direct CTA */}
               {currentView === 'studio' ? (
                 <button
                   type="button"
                   onClick={() => onSelectView && onSelectView('portal')}
-                  className="inline-flex cursor-pointer items-center rounded-lg bg-[#c8f31d] px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#10110f] transition hover:bg-[#b8e314]"
+                  className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-3.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
                 >
                   Member Portal
                 </button>
@@ -91,33 +110,34 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
                 <button
                   type="button"
                   onClick={() => onSelectView && onSelectView('studio')}
-                  className="inline-flex cursor-pointer items-center rounded-lg border border-[#10110f] bg-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f] transition hover:bg-[#10110f] hover:text-white"
+                  className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-300 bg-white px-3.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
                 >
                   Studio Overview
                 </button>
               )}
 
+              {/* Sign Out Button */}
               <button
                 type="button"
                 onClick={logout}
-                className="inline-flex cursor-pointer items-center rounded-lg bg-[#10110f] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-neutral-800"
+                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-200 bg-white px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-600 shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98]"
               >
                 Sign Out
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-2.5">
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="inline-flex cursor-pointer items-center justify-center border border-[#10110f] bg-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f] transition hover:bg-[#10110f] hover:text-white sm:text-[11px]"
+                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl border border-neutral-300 bg-white px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f] shadow-xs transition-all duration-200 hover:border-[#c8f31d] hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-3.5 sm:text-[11px]"
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#10110f] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f] sm:text-[11px]"
+                className="inline-flex h-8 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-3.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] sm:px-4 sm:text-[11px]"
               >
                 Member Portal
               </button>
