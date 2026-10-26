@@ -17,12 +17,18 @@
     "tasks": "node scripts/task-status.js",
     "tasks:sync": "node scripts/task-status.js --sync",
     "setup:namecheap": "bash scripts/setup-namecheap-remote.sh",
+    "deploy:production": "npm run build && git add client/dist && (git diff --cached --quiet || git commit -m 'chore(build): update production build distribution') && git push production main",
     "test": "npm run lint:client"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^18.0.9",
-    "jsonwebtoken": "^9.0.3"
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.13.3"
   },
   "devDependencies": {
     "concurrently": "^10.0.6"

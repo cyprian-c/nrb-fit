@@ -14,15 +14,22 @@ import membershipRoutes from './routes/membershipRoutes.js'
 import portalRoutes from './routes/portalRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
-// Load environment variables from local server directory and workspace root.
-dotenv.config()
-dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '../.env' })
-if (!process.env.JWT_SECRET && process.env.NODE_ENV !== 'production') {
-  process.env.JWT_SECRET = 'nrbfit_jwt_session_secret_development_fallback_key'
-}
-
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+// Robustly load environment variables across local dev, cPanel app root, and custom paths.
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
+dotenv.config({ path: path.resolve(__dirname, '.env') })
+if (process.env.DOTENV_CONFIG_PATH) {
+  dotenv.config({ path: process.env.DOTENV_CONFIG_PATH })
+}
+dotenv.config()
+
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = process.env.NODE_ENV === 'production'
+    ? 'nrbfit_jwt_production_fallback_secret_change_in_env'
+    : 'nrbfit_jwt_session_secret_development_fallback_key'
+}
 
 const app = express()
 const rawPort = process.env.PORT || 5000
@@ -89,9 +96,10 @@ app.use('/api/portal', portalRoutes)
 // Serve frontend client dist in production if available (workspace build or public dir)
 const distCandidates = [
   path.resolve(__dirname, '../client/dist'),
+  path.resolve(process.cwd(), 'client/dist'),
   path.resolve(__dirname, 'public'),
 ]
-const clientDistPath = distCandidates.find((dir) => fs.existsSync(dir))
+const clientDistPath = distCandidates.find((dir) => fs.existsSync(dir) && fs.existsSync(path.join(dir, 'index.html')))
 
 if (clientDistPath) {
   app.use(
@@ -117,15 +125,24 @@ if (clientDistPath) {
 // Keep error handling last so it receives failures from every route above.
 app.use(errorHandler)
 
-if (typeof port === 'string') {
-  // Handle Passenger / CloudLinux Unix socket paths
-  app.listen(port, () => {
-    console.info(`[server] NRBFIT API listening on socket ${port}`)
-  })
-} else {
-  app.listen(port, '0.0.0.0', () => {
-    console.info(`[server] NRBFIT API listening on port ${port}`)
-  })
-}
+// Prevent uncaught errors from silently terminating Passenger without diagnostics
+process.on('uncaughtException', (error) => {
+  console.error('[server] Uncaught Exception:', error)
+})
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[server] Unhandled Rejection at:', promise, 'reason:', reason)
+})
+
+const server = typeof port === 'string'
+  ? app.listen(port, () => {
+      console.info(`[server] NRBFIT API listening on socket ${port}`)
+    })
+  : app.listen(port, () => {
+      console.info(`[server] NRBFIT API listening on port ${port}`)
+    })
+
+server.on('error', (error) => {
+  console.error('[server] Server listen error:', error)
+})
 
 export { app }

@@ -14,9 +14,12 @@ node_modules/
 /task.md
 server/docs/
 
-# Automation, deployment, and server scripts (hidden from commit)
-scripts/*
+# Automation, deployment, and server scripts
 !scripts/task-status.js
+!scripts/namecheap-post-receive.sh
+!scripts/setup-namecheap-remote.sh
+!scripts/check-no-typescript.js
+!scripts/pre-push.sh
 
 # Logs
 logs
