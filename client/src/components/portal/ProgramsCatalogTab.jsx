@@ -1,0 +1,137 @@
+import { useState } from 'react'
+
+export default function ProgramsCatalogTab({
+  programs,
+  enrollments,
+  onOpenProgram,
+}) {
+  const [selectedCategory, setSelectedCategory] = useState('all')
+
+  const categories = [
+    { id: 'all', label: 'All Routines' },
+    { id: 'full_body', label: 'Full Body' },
+    { id: 'abs', label: 'Abs & Core' },
+    { id: 'chest', label: 'Chest & Arms' },
+    { id: 'legs', label: 'Lower Body' },
+    { id: 'mobility', label: 'Mobility & Recovery' },
+  ]
+
+  const enrollmentMap = new Map()
+  if (enrollments) {
+    for (const e of enrollments) {
+      enrollmentMap.set(e.program_id, e)
+    }
+  }
+
+  const filteredPrograms = (programs || []).filter((prog) => {
+    if (selectedCategory === 'all') return true
+    return prog.category === selectedCategory
+  })
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#84ae00]">
+            Home Workout Catalog
+          </span>
+          <h2 className="mt-1 font-[Barlow_Condensed] text-3xl font-extrabold uppercase tracking-tight text-[#10110f] sm:text-4xl">
+            Bodyweight Training Programs
+          </h2>
+          <p className="mt-1 text-xs text-neutral-600 sm:text-sm">
+            Progressive daily training routines inspired by athletic conditioning. No gym machines or bulky gear required.
+          </p>
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="flex flex-wrap gap-1.5">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${
+                selectedCategory === cat.id
+                  ? 'bg-[#10110f] text-white'
+                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Program Cards Grid */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredPrograms.map((prog) => {
+          const enrollment = enrollmentMap.get(prog.id)
+          const isEnrolled = Boolean(enrollment)
+
+          return (
+            <div
+              key={prog.id}
+              className="flex flex-col justify-between rounded-2xl border border-[#e4e5df] bg-white p-6 shadow-xs transition hover:border-[#10110f] hover:shadow-md"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <span
+                    className="rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white"
+                    style={{ backgroundColor: prog.banner_color || '#84ae00' }}
+                  >
+                    {prog.category.replace('_', ' ')}
+                  </span>
+
+                  <span className="rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-bold uppercase text-neutral-600">
+                    {prog.difficulty}
+                  </span>
+                </div>
+
+                <h3 className="mt-4 font-[Barlow_Condensed] text-2xl font-extrabold uppercase tracking-tight text-[#10110f]">
+                  {prog.title}
+                </h3>
+
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600">
+                  {prog.description}
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] font-semibold text-neutral-500">
+                  <span>📅 {prog.duration_days} Days Total</span>
+                  <span>⏱ 15–25 min/day</span>
+                  <span>⚡ {prog.session_count || 28} Routines</span>
+                </div>
+              </div>
+
+              <div className="mt-6 border-t border-neutral-100 pt-4">
+                {isEnrolled ? (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#84ae00]">
+                        Active · Day {enrollment.current_day}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onOpenProgram(prog.slug)}
+                      className="cursor-pointer rounded-lg bg-[#10110f] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#c8f31d] hover:text-[#10110f]"
+                    >
+                      Continue Day {enrollment.current_day} →
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onOpenProgram(prog.slug)}
+                    className="w-full cursor-pointer rounded-lg border border-neutral-300 bg-white py-2.5 text-center text-xs font-bold uppercase tracking-wider text-[#10110f] transition hover:border-black hover:bg-neutral-50"
+                  >
+                    View Program Schedule & Enroll →
+                  </button>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

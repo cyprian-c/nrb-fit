@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext.jsx'
 
 // Header: keeps the studio branding, in-page navigation, and authentication state anchored.
-export default function Header({ onOpenAuth, onOpenBookings }) {
+export default function Header({ onOpenAuth, currentView = 'studio', onSelectView }) {
   const { user, logout } = useAuth()
 
   const firstName = user?.full_name ? user.full_name.split(' ')[0] : 'Member'
@@ -15,18 +15,55 @@ export default function Header({ onOpenAuth, onOpenBookings }) {
     : 'M'
 
   return (
-    <header className="border-b border-[#e4e5df] bg-white/95 px-6 py-5 backdrop-blur-sm sm:px-10 lg:px-20">
+    <header className="sticky top-0 z-40 border-b border-[#e4e5df] bg-white/95 px-6 py-4 backdrop-blur-sm sm:px-10 lg:px-20">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        <a href="#top" className="font-[Barlow_Condensed] text-3xl font-extrabold tracking-tight text-[#10110f]">
-          NRBFIT<span className="text-[#84ae00]">.</span>
-        </a>
+        <div className="flex items-center gap-6">
+          <button
+            type="button"
+            onClick={() => onSelectView && onSelectView('studio')}
+            className="cursor-pointer font-[Barlow_Condensed] text-3xl font-extrabold tracking-tight text-[#10110f]"
+          >
+            NRBFIT<span className="text-[#84ae00]">.</span>
+          </button>
 
-        <nav className="hidden items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#10110f] md:flex" aria-label="Main navigation">
-          <a href="#classes" className="transition hover:opacity-70">Classes</a>
-          <a href="#coaches" className="transition hover:opacity-70">Coaches</a>
-          <a href="#memberships" className="transition hover:opacity-70">Packages</a>
-          <a href="#contact" className="transition hover:opacity-70">Contact</a>
-        </nav>
+          {/* View Indicator Badge */}
+          {user && (
+            <div className="hidden rounded-full border border-neutral-200 bg-neutral-100 p-0.5 sm:inline-flex">
+              <button
+                type="button"
+                onClick={() => onSelectView && onSelectView('studio')}
+                className={`cursor-pointer rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+                  currentView === 'studio'
+                    ? 'bg-[#10110f] text-white'
+                    : 'text-neutral-600 hover:text-black'
+                }`}
+              >
+                Studio
+              </button>
+              <button
+                type="button"
+                onClick={() => onSelectView && onSelectView('portal')}
+                className={`cursor-pointer rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+                  currentView === 'portal'
+                    ? 'bg-[#10110f] text-white'
+                    : 'text-neutral-600 hover:text-black'
+                }`}
+              >
+                Member Portal
+              </button>
+            </div>
+          )}
+        </div>
+
+        {currentView === 'studio' && (
+          <nav className="hidden items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#10110f] md:flex" aria-label="Main navigation">
+            <a href="#classes" className="transition hover:opacity-70">Classes</a>
+            <a href="#programs-teaser" className="transition hover:opacity-70">Home Programs</a>
+            <a href="#coaches" className="transition hover:opacity-70">Coaches</a>
+            <a href="#memberships" className="transition hover:opacity-70">Packages</a>
+            <a href="#contact" className="transition hover:opacity-70">Contact</a>
+          </nav>
+        )}
 
         <div className="flex items-center gap-3">
           {user ? (
@@ -37,22 +74,33 @@ export default function Header({ onOpenAuth, onOpenBookings }) {
               >
                 {initials}
               </div>
-              <span className="hidden text-[11px] font-bold uppercase tracking-[0.12em] text-[#10110f] sm:inline">
+              <span className="hidden text-[11px] font-bold uppercase tracking-[0.12em] text-[#10110f] lg:inline">
                 Hi, {firstName}
               </span>
-              {onOpenBookings && (
+
+              {/* View Switch Button for Mobile / Quick Access */}
+              {currentView === 'studio' ? (
                 <button
                   type="button"
-                  onClick={onOpenBookings}
-                  className="inline-flex items-center border border-[#10110f] bg-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f] transition hover:bg-[#f6f7f3]"
+                  onClick={() => onSelectView && onSelectView('portal')}
+                  className="inline-flex cursor-pointer items-center rounded-lg bg-[#c8f31d] px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#10110f] transition hover:bg-[#b8e314]"
                 >
-                  My Bookings
+                  Member Portal ⚡
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onSelectView && onSelectView('studio')}
+                  className="inline-flex cursor-pointer items-center rounded-lg border border-[#10110f] bg-transparent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#10110f] transition hover:bg-[#10110f] hover:text-white"
+                >
+                  Studio Overview
                 </button>
               )}
+
               <button
                 type="button"
                 onClick={logout}
-                className="inline-flex items-center bg-[#10110f] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f]"
+                className="inline-flex cursor-pointer items-center rounded-lg bg-[#10110f] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-neutral-800"
               >
                 Sign Out
               </button>
@@ -66,12 +114,13 @@ export default function Header({ onOpenAuth, onOpenBookings }) {
               >
                 Sign In
               </button>
-              <a
-                href="#contact"
-                className="inline-flex items-center justify-center bg-[#10110f] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f] sm:text-[11px]"
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#10110f] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f] sm:text-[11px]"
               >
-                Book a visit
-              </a>
+                Member Portal
+              </button>
             </div>
           )}
         </div>
