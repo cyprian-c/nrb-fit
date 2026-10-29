@@ -12,7 +12,8 @@ node_modules/
 /context/
 /site.md
 /task.md
-server/docs/
+server/docs/*
+!server/docs/schema.md
 
 # Automation, deployment, and server scripts
 !scripts/task-status.js
@@ -51,6 +52,7 @@ dist-ssr/
 .vercel
 
 # Test artifacts and debug logs
+.agents/
 .playwright-mcp/
 test-results/
 coverage/

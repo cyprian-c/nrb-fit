@@ -1,4 +1,10 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { pool } from '../config/db.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Keep the schema definitions together so the initial database setup can be
 // applied atomically and rerun safely when a deployment is initialized again.
@@ -171,6 +177,23 @@ async function migrate() {
     client = await pool.connect()
     await client.query('BEGIN')
     await client.query(schemaSql)
+
+    // Execute additional migration files from server/migrations if present
+    const migrationsDir = path.resolve(__dirname, '../migrations')
+    if (fs.existsSync(migrationsDir)) {
+      const files = fs
+        .readdirSync(migrationsDir)
+        .filter((file) => file.endsWith('.sql'))
+        .sort()
+
+      for (const file of files) {
+        const filePath = path.join(migrationsDir, file)
+        const sql = fs.readFileSync(filePath, 'utf-8')
+        await client.query(sql)
+        console.info(`[migrate] Applied migration: ${file}`)
+      }
+    }
+
     await client.query('COMMIT')
     console.info('Database schema migration completed successfully.')
   } catch (error) {
