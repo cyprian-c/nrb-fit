@@ -9,6 +9,11 @@ export function verifyStripeWebhook(req, res, next) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || STRIPE_WEBHOOK_SECRET
 
   if (!signature) {
+    // In development/test mode, allow simulated webhook calls without signing secret
+    if (process.env.NODE_ENV !== 'production' && req.body && req.body.type) {
+      req.stripeEvent = req.body
+      return next()
+    }
     return res.status(400).json({ error: 'Missing Stripe-Signature header.' })
   }
 
@@ -16,6 +21,11 @@ export function verifyStripeWebhook(req, res, next) {
 
   if (!webhookSecret) {
     console.warn('[stripe] STRIPE_WEBHOOK_SECRET is not configured.')
+    // In dev, fall back to parsing json
+    if (process.env.NODE_ENV !== 'production' && req.body?.type) {
+      req.stripeEvent = req.body
+      return next()
+    }
     return res.status(500).json({ error: 'Stripe webhook secret is not configured on the server.' })
   }
 

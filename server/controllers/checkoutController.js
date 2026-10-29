@@ -149,3 +149,96 @@ export async function createCheckoutSession(req, res, next) {
     next(error)
   }
 }
+
+/**
+ * Handles incoming Stripe Webhook events.
+ * Updates order status to 'paid' or 'failed' based on Stripe lifecycle events.
+ */
+export async function handleStripeWebhook(req, res, next) {
+  try {
+    const event = req.stripeEvent || req.body
+
+    if (!event || !event.type) {
+      return res.status(400).json({ error: 'Invalid event payload.' })
+    }
+
+    console.info(`[stripe-webhook] Processing event: ${event.type} (id: ${event.id || 'n/a'})`)
+
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data?.object
+        if (!session) break
+
+        const sessionId = session.id
+        const orderId = session.metadata?.order_id
+        const paymentIntentId = session.payment_intent || null
+
+        // Mark order paid by order_id or stripe_session_id
+        let updateQuery = ''
+        let params = []
+
+        if (orderId) {
+          updateQuery = `
+            UPDATE orders
+            SET status = 'paid',
+                stripe_payment_intent_id = COALESCE($1, stripe_payment_intent_id),
+                stripe_session_id = COALESCE($2, stripe_session_id),
+                paid_at = CURRENT_TIMESTAMP
+            WHERE id = $3
+            RETURNING id, status, paid_at;
+          `
+          params = [paymentIntentId, sessionId, parseInt(orderId, 10)]
+        } else if (sessionId) {
+          updateQuery = `
+            UPDATE orders
+            SET status = 'paid',
+                stripe_payment_intent_id = COALESCE($1, stripe_payment_intent_id),
+                paid_at = CURRENT_TIMESTAMP
+            WHERE stripe_session_id = $2
+            RETURNING id, status, paid_at;
+          `
+          params = [paymentIntentId, sessionId]
+        }
+
+        if (updateQuery) {
+          const result = await query(updateQuery, params)
+          if (result.rowCount > 0) {
+            console.info(`[stripe-webhook] Order #${result.rows[0].id} marked as PAID.`)
+          } else {
+            console.warn(`[stripe-webhook] No matching order found for session ${sessionId} / order ${orderId}.`)
+          }
+        }
+        break
+      }
+
+      case 'payment_intent.payment_failed': {
+        const paymentIntent = event.data?.object
+        if (!paymentIntent) break
+
+        const paymentIntentId = paymentIntent.id
+        const orderId = paymentIntent.metadata?.order_id
+
+        if (orderId) {
+          await query(
+            `UPDATE orders SET status = 'failed' WHERE id = $1 AND status = 'pending'`,
+            [parseInt(orderId, 10)],
+          )
+        } else if (paymentIntentId) {
+          await query(
+            `UPDATE orders SET status = 'failed' WHERE stripe_payment_intent_id = $1 AND status = 'pending'`,
+            [paymentIntentId],
+          )
+        }
+        console.warn(`[stripe-webhook] Payment failed for intent ${paymentIntentId}.`)
+        break
+      }
+
+      default:
+        console.info(`[stripe-webhook] Unhandled event type: ${event.type}`)
+    }
+
+    return res.status(200).json({ received: true })
+  } catch (error) {
+    next(error)
+  }
+}
