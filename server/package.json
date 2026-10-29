@@ -8,7 +8,8 @@
     "dev": "nodemon index.js",
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/seed.js",
-    "test:webhook": "node scripts/test-webhook.js"
+    "test:webhook": "node scripts/test-webhook.js",
+    "test:e2e": "node scripts/test-e2e-checkout.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

@@ -14,6 +14,7 @@ node_modules/
 /task.md
 server/docs/*
 !server/docs/schema.md
+!server/docs/stripe-setup.md
 
 # Automation, deployment, and server scripts
 !scripts/task-status.js
