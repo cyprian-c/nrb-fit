@@ -12,6 +12,7 @@ import coachRoutes from './routes/coachRoutes.js'
 import enquiryRoutes from './routes/enquiryRoutes.js'
 import membershipRoutes from './routes/membershipRoutes.js'
 import portalRoutes from './routes/portalRoutes.js'
+import checkoutRoutes from './routes/checkoutRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -100,6 +101,7 @@ app.use('/api/coaches', coachRoutes)
 app.use('/api/memberships', membershipRoutes)
 app.use('/api/enquiries', enquiryRoutes)
 app.use('/api/portal', portalRoutes)
+app.use('/api/checkout', checkoutRoutes)
 
 // Serve frontend client dist in production if available (workspace build or public dir)
 const distCandidates = [
