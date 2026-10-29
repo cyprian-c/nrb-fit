@@ -1,0 +1,1 @@
+import{b as e}from"./index-DrXtoNZf.js";async function t(t,n=1){return e(`/checkout/create`,{method:`POST`,body:{membership_id:t,quantity:n}})}async function n(t={}){let n=typeof t==`object`?`?`+new URLSearchParams(t).toString():`/${t}`;return e(`/orders${n}`)}export{n,t};

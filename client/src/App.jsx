@@ -11,6 +11,7 @@ const MembershipSection = lazy(() => import('./components/MembershipSection'))
 const ContactSection = lazy(() => import('./components/ContactSection'))
 const MemberPortal = lazy(() => import('./components/portal/MemberPortal'))
 const AuthModal = lazy(() => import('./components/AuthModal'))
+const Success = lazy(() => import('./pages/Success'))
 
 function SectionLoadingFallback() {
   return (
@@ -29,23 +30,33 @@ function App() {
   const { user } = useAuth()
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [currentView, setCurrentView] = useState(() => {
-    return typeof window !== 'undefined' && window.location.hash === '#portal'
-      ? 'portal'
-      : 'studio'
+    if (typeof window !== 'undefined') {
+      if (window.location.pathname.startsWith('/success') || window.location.search.includes('session_id')) {
+        return 'success'
+      }
+      return window.location.hash === '#portal' ? 'portal' : 'studio'
+    }
+    return 'studio'
   })
 
-  // Handle hash changes for seamless back/forward navigation
+  // Handle hash and popstate changes for seamless navigation
   useEffect(() => {
-    function handleHashChange() {
-      if (window.location.hash === '#portal') {
+    function handleLocationChange() {
+      if (window.location.pathname.startsWith('/success') || window.location.search.includes('session_id')) {
+        setCurrentView('success')
+      } else if (window.location.hash === '#portal') {
         setCurrentView('portal')
       } else if (window.location.hash === '#studio' || !window.location.hash) {
         setCurrentView('studio')
       }
     }
 
-    window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
+    window.addEventListener('hashchange', handleLocationChange)
+    window.addEventListener('popstate', handleLocationChange)
+    return () => {
+      window.removeEventListener('hashchange', handleLocationChange)
+      window.removeEventListener('popstate', handleLocationChange)
+    }
   }, [])
 
   function handleSelectView(view) {
@@ -55,7 +66,11 @@ function App() {
     }
     setCurrentView(view)
     if (typeof window !== 'undefined') {
-      window.location.hash = view === 'portal' ? 'portal' : 'top'
+      if (view === 'studio') {
+        window.history.pushState({}, '', '/')
+      } else {
+        window.location.hash = view === 'portal' ? 'portal' : 'top'
+      }
     }
   }
 
@@ -69,7 +84,12 @@ function App() {
 
       <main id="top">
         <Suspense fallback={<SectionLoadingFallback />}>
-          {currentView === 'portal' && user ? (
+          {currentView === 'success' ? (
+            <Success
+              onGoToPortal={() => handleSelectView('portal')}
+              onBackToHome={() => handleSelectView('studio')}
+            />
+          ) : currentView === 'portal' && user ? (
             <MemberPortal onBackToStudio={() => handleSelectView('studio')} />
           ) : (
             <>
