@@ -13,6 +13,7 @@ import enquiryRoutes from './routes/enquiryRoutes.js'
 import membershipRoutes from './routes/membershipRoutes.js'
 import portalRoutes from './routes/portalRoutes.js'
 import checkoutRoutes from './routes/checkoutRoutes.js'
+import orderRoutes from './routes/orderRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -102,6 +103,7 @@ app.use('/api/memberships', membershipRoutes)
 app.use('/api/enquiries', enquiryRoutes)
 app.use('/api/portal', portalRoutes)
 app.use('/api/checkout', checkoutRoutes)
+app.use('/api/orders', orderRoutes)
 
 // Serve frontend client dist in production if available (workspace build or public dir)
 const distCandidates = [
@@ -143,12 +145,17 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('[server] Unhandled Rejection at:', promise, 'reason:', reason)
 })
 
-const server = app.listen(port, () => {
-  console.info(`[server] NRBFIT API listening on ${port}`)
-})
+let server
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(port, () => {
+    console.info(`[server] NRBFIT API listening on ${port}`)
+  })
 
-server.on('error', (error) => {
-  console.error('[server] Server listen error:', error)
-})
+  server.on('error', (error) => {
+    if (error.code !== 'EADDRINUSE') {
+      console.error('[server] Server listen error:', error)
+    }
+  })
+}
 
 export { app }
