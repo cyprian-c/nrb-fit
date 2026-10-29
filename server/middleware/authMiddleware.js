@@ -2,6 +2,10 @@ import jwt from 'jsonwebtoken'
 
 const sessionCookieName = 'nrb_session'
 
+/**
+ * Extract session token from either HTTP-only cookie or Bearer Authorization header.
+ * Enables seamless authentication across browser SPA cookies and API clients.
+ */
 function getSessionToken(request) {
   if (request.cookies?.[sessionCookieName]) {
     return request.cookies[sessionCookieName]
@@ -15,6 +19,12 @@ function getSessionToken(request) {
   return null
 }
 
+/**
+ * Authentication gate middleware.
+ * Verifies JWT session token and populates request.user.
+ * Rejects unauthenticated requests with HTTP 401.
+ * Used to protect checkout session creation, member bookings, and portal operations.
+ */
 export function requireAuth(request, response, next) {
   const token = getSessionToken(request)
 
