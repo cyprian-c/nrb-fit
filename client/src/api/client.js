@@ -131,3 +131,18 @@ export async function markAlertRead(alertId = 'all') {
     method: 'POST',
   })
 }
+
+// Stripe Checkout & Orders
+export async function createCheckoutSession(membershipId, quantity = 1) {
+  return apiFetch('/checkout/create', {
+    method: 'POST',
+    body: { membership_id: membershipId, quantity },
+  })
+}
+
+export async function fetchOrder(params = {}) {
+  const queryParam = typeof params === 'object'
+    ? '?' + new URLSearchParams(params).toString()
+    : `/${params}`
+  return apiFetch(`/orders${queryParam}`)
+}

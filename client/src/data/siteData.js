@@ -98,6 +98,7 @@ export const coachProfiles = [
 
 export const membershipPlans = [
   {
+    id: 1,
     label: 'Class drop-in',
     title: 'One coached session.',
     price: 'KES 2,000',
@@ -106,6 +107,7 @@ export const membershipPlans = [
     perks: ['Any available class', 'Coach-led session', 'Mat and studio equipment included'],
   },
   {
+    id: 2,
     label: '5-class pack',
     title: 'Build a steady rhythm.',
     price: 'KES 8,500',
@@ -114,6 +116,7 @@ export const membershipPlans = [
     perks: ['Any scheduled class', 'Save KES 1,500 vs drop-ins', 'Book up to 14 days ahead'],
   },
   {
+    id: 3,
     label: '10-class pack',
     title: 'Make training a habit.',
     price: 'KES 15,000',
@@ -122,6 +125,7 @@ export const membershipPlans = [
     perks: ['Any scheduled class', 'Save KES 5,000 vs drop-ins', 'Book up to 14 days ahead'],
   },
   {
+    id: 4,
     label: 'Studio monthly',
     title: 'Your weekly training plan.',
     price: 'KES 18,000',
@@ -131,6 +135,7 @@ export const membershipPlans = [
     featured: true,
   },
   {
+    id: 5,
     label: 'Unlimited studio',
     title: 'Make the studio yours.',
     price: 'KES 28,000',
@@ -139,6 +144,7 @@ export const membershipPlans = [
     perks: ['Unlimited scheduled classes', 'Priority booking, 14 days ahead', 'One guest class each month'],
   },
   {
+    id: 6,
     label: 'Open gym access',
     title: 'Train on your own terms.',
     price: 'KES 12,000',

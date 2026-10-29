@@ -81,7 +81,7 @@ function App() {
                 />
                 <ClassScheduleSection onOpenAuth={() => setAuthModalOpen(true)} />
                 <CoachSection />
-                <MembershipSection />
+                <MembershipSection onOpenAuth={() => setAuthModalOpen(true)} />
               </div>
               <ContactSection />
             </>
