@@ -2,7 +2,11 @@ import { Router } from 'express'
 import { requireAuth } from '../middleware/authMiddleware.js'
 import { createRateLimiter } from '../middleware/rateLimiter.js'
 import { verifyStripeWebhook } from '../middleware/stripeWebhook.js'
-import { createCheckoutSession, handleStripeWebhook } from '../controllers/checkoutController.js'
+import {
+  createCartCheckoutSession,
+  createCheckoutSession,
+  handleStripeWebhook,
+} from '../controllers/checkoutController.js'
 
 const router = Router()
 
@@ -14,6 +18,7 @@ const checkoutLimiter = createRateLimiter({
 })
 
 router.post('/create', requireAuth, checkoutLimiter, createCheckoutSession)
+router.post('/cart', requireAuth, checkoutLimiter, createCartCheckoutSession)
 router.post('/webhook', verifyStripeWebhook, handleStripeWebhook)
 
 export default router

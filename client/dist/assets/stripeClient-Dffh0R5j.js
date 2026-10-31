@@ -1,1 +1,0 @@
-import{b as e}from"./index-CBYJD9k7.js";async function t(t,n=1,r=[]){return e(`/checkout/create`,{method:`POST`,body:{membership_id:t,quantity:n,services:r}})}async function n(t={}){let n=typeof t==`object`?`?`+new URLSearchParams(t).toString():`/${t}`;return e(`/orders${n}`)}export{n,t};

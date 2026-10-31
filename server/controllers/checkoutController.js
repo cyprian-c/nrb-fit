@@ -14,6 +14,10 @@ export async function createCheckoutSession(req, res, next) {
       return res.status(401).json({ error: 'Authentication required.' })
     }
 
+    if (!isStripeConfigured) {
+      return res.status(503).json({ error: 'Stripe checkout is not configured on this server.' })
+    }
+
     const membershipId = parseInt(membership_id, 10)
     const parsedQuantity = Math.max(1, parseInt(quantity, 10) || 1)
 
@@ -71,12 +75,6 @@ export async function createCheckoutSession(req, res, next) {
               total_price: itemTotal,
             })
 
-            // Add to order_items
-            await query(
-              `INSERT INTO order_items (order_id, service_id, price, quantity, label, title)
-               VALUES (0, $1, $2, $3, $4, $5)`, // order_id will be updated
-              [row.id, servicePrice, qty, row.name, row.category || 'Service'],
-            )
           }
         }
       }
@@ -119,15 +117,7 @@ export async function createCheckoutSession(req, res, next) {
 
     const orderId = orderResult.rows[0].id
 
-    // 6. Update order_items with correct order_id
-    await query(
-      `INSERT INTO order_items (order_id, membership_id, price, quantity, label, title)
-       VALUES ${serviceItems.map((_, i) => `(${i + 1}${','.repeat(6)}),`).slice(0, -1).join('')}
-       ON CONFLICT DO NOTHING`,
-      // If there are items, we need to insert them properly
-    )
-
-    // 6b. Insert membership order item
+    // 6. Persist the membership and add-on rows against the newly created order.
     await query(
       `INSERT INTO order_items (order_id, membership_id, price, quantity, label, title)
        VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -144,11 +134,12 @@ export async function createCheckoutSession(req, res, next) {
     }
 
     // 7. Build Success & Cancel URLs
-    const clientBaseUrl =
+    const clientBaseUrl = (
       process.env.CLIENT_URL ||
       (req.headers.origin && req.headers.origin !== 'null'
         ? req.headers.origin
         : 'http://localhost:5173')
+    ).split(',')[0].trim().replace(/\/+$/, '')
 
     const successUrl = `${clientBaseUrl}/success?session_id={CHECKOUT_SESSION_ID}`
     const cancelUrl = `${clientBaseUrl}/#memberships`
@@ -188,6 +179,12 @@ export async function createCheckoutSession(req, res, next) {
           success_url: successUrl,
           cancel_url: cancelUrl,
           customer_email: req.user.email,
+          payment_intent_data: {
+            metadata: {
+              order_id: String(orderId),
+              user_id: String(userId),
+            },
+          },
           metadata: {
             order_id: String(orderId),
             user_id: String(userId),
@@ -225,11 +222,123 @@ export async function createCheckoutSession(req, res, next) {
 }
 
 /**
+ * Creates a Stripe Checkout Session from the authenticated user's saved cart.
+ * Product names and prices are read from the database, never from the browser.
+ */
+export async function createCartCheckoutSession(req, res, next) {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required.' })
+    }
+    if (!isStripeConfigured) {
+      return res.status(503).json({ error: 'Stripe checkout is not configured on this server.' })
+    }
+
+    const cartResult = await query(
+      `SELECT ci.id AS cart_item_id, ci.service_id, ci.membership_id, ci.quantity,
+              CASE WHEN ci.membership_id IS NOT NULL THEN m.label ELSE s.name END AS label,
+              CASE WHEN ci.membership_id IS NOT NULL THEN m.title ELSE s.category END AS title,
+              CASE WHEN ci.membership_id IS NOT NULL THEN m.price ELSE s.price END AS price
+       FROM cart_items ci
+       LEFT JOIN memberships m ON ci.membership_id = m.id
+       LEFT JOIN services s ON ci.service_id = s.id AND s.is_active = true
+       WHERE ci.user_id = $1 AND ci.status = 'active'
+       ORDER BY ci.created_at ASC`,
+      [userId],
+    )
+
+    if (cartResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Your cart is empty.' })
+    }
+
+    const items = cartResult.rows.map((row) => {
+      const unitPrice = Number.parseFloat(String(row.price).replace(/[^0-9.]/g, ''))
+      if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
+        throw new Error(`The price for ${row.label || 'a cart item'} is not configured correctly.`)
+      }
+      return {
+        cart_item_id: row.cart_item_id,
+        membership_id: row.membership_id,
+        service_id: row.service_id,
+        label: row.label,
+        title: row.title || '',
+        unit_price: unitPrice,
+        quantity: row.quantity,
+        total_price: unitPrice * row.quantity,
+      }
+    })
+    const totalAmount = items.reduce((total, item) => total + item.total_price, 0)
+    const currency = 'kes'
+    const itemsSnapshot = items.map(({ cart_item_id, ...item }) => item)
+
+    const orderResult = await query(
+      `INSERT INTO orders (user_id, total_amount, currency, status, items)
+       VALUES ($1, $2, $3, 'pending', $4)
+       RETURNING id`,
+      [userId, totalAmount, currency, JSON.stringify(itemsSnapshot)],
+    )
+    const orderId = orderResult.rows[0].id
+
+    for (const item of items) {
+      await query(
+        `INSERT INTO order_items (order_id, membership_id, service_id, price, quantity, label, title)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [orderId, item.membership_id, item.service_id, item.unit_price, item.quantity, item.label, item.title],
+      )
+    }
+
+    const clientBaseUrl = (
+      process.env.CLIENT_URL ||
+      (req.headers.origin && req.headers.origin !== 'null' ? req.headers.origin : 'http://localhost:5173')
+    ).split(',')[0].trim().replace(/\/+$/, '')
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: items.map((item) => ({
+        price_data: {
+          currency,
+          product_data: {
+            name: item.label,
+            description: item.title || undefined,
+          },
+          unit_amount: Math.round(item.unit_price * 100),
+        },
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      success_url: `${clientBaseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${clientBaseUrl}/#memberships`,
+      customer_email: req.user.email,
+      payment_intent_data: {
+        metadata: { order_id: String(orderId), user_id: String(userId) },
+      },
+      metadata: { order_id: String(orderId), user_id: String(userId), cart_checkout: 'true' },
+    })
+
+    await query('UPDATE orders SET stripe_session_id = $1 WHERE id = $2', [session.id, orderId])
+
+    return res.status(200).json({
+      orderId,
+      checkoutUrl: session.url,
+      sessionId: session.id,
+      totalAmount,
+      currency,
+      items: itemsSnapshot,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
  * Handle Stripe webhook events for checkout session completion.
  */
 export async function handleStripeWebhook(req, res, next) {
   try {
-    const { event } = req
+    const event = req.stripeEvent
+    if (!event?.type) {
+      return res.status(400).json({ error: 'A valid Stripe event is required.' })
+    }
 
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -240,11 +349,26 @@ export async function handleStripeWebhook(req, res, next) {
 
         if (orderId) {
           const result = await query(
-            `UPDATE orders SET status = 'paid', paid_at = CURRENT_TIMESTAMP, stripe_payment_intent_id = $1 WHERE id = $2`,
-            [paymentIntentId, orderId],
+            `UPDATE orders
+             SET status = 'paid', paid_at = CURRENT_TIMESTAMP, stripe_payment_intent_id = $1
+             WHERE id = $2 AND stripe_session_id = $3 AND status = 'pending'`,
+            [paymentIntentId, orderId, sessionId],
           )
 
           if (result.rowCount > 0) {
+            await query(
+              `UPDATE cart_items ci
+               SET status = 'checked_out', updated_at = CURRENT_TIMESTAMP
+               WHERE ci.user_id = (SELECT user_id FROM orders WHERE id = $1)
+                 AND ci.status = 'active'
+                 AND EXISTS (
+                   SELECT 1 FROM order_items oi
+                   WHERE oi.order_id = $2 AND oi.quantity = ci.quantity
+                     AND ((oi.membership_id IS NOT NULL AND oi.membership_id = ci.membership_id)
+                       OR (oi.service_id IS NOT NULL AND oi.service_id = ci.service_id))
+                 )`,
+              [orderId, orderId],
+            )
             console.info(`[stripe-webhook] Order #${orderId} marked as PAID.`)
           } else {
             console.warn(`[stripe-webhook] No order found with ID ${orderId}.`)

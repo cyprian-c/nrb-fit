@@ -1,25 +1,30 @@
 # NRBFIT Database Schema
 
-This document explains the NRBFIT database in plain English. The schema is created by `server/scripts/migrate.js` and stores the studio's members, coaches, timetable, memberships, bookings, and enquiries.
+This document explains the NRBFIT database in plain English. The schema is created by `server/scripts/migrate.js` and stores studio data, member training activity, carts, and Stripe orders.
 
 ## How The Database Fits Together
 
 - A **coach** can lead many scheduled **classes**.
 - A **class** can have many **bookings** from different members.
-- A **user** can make many **bookings** and place many **orders**.
+- A **user** can make many **bookings**, save many **cart_items**, and place many **orders**.
 - A booking belongs to one user and one class.
 - An **order** belongs to one user and contains many **order_items**.
-- An **order_item** belongs to one order and optionally references a **membership**.
+- An **order_item** belongs to one order and optionally references a **membership** or a **service**.
+- A **cart_item** belongs to one user and references exactly one membership or service product.
 - **Memberships** and **enquiries** are studio records that power pricing and visitor communications.
 
 ```mermaid
 erDiagram
     USERS ||--o{ BOOKINGS : makes
     USERS ||--o{ ORDERS : places
+    USERS ||--o{ CART_ITEMS : saves
     CLASSES ||--o{ BOOKINGS : receives
     COACHES ||--o{ CLASSES : leads
     ORDERS ||--o{ ORDER_ITEMS : contains
     MEMBERSHIPS ||--o{ ORDER_ITEMS : purchased_in
+    MEMBERSHIPS ||--o{ CART_ITEMS : selected
+    SERVICES ||--o{ ORDER_ITEMS : purchased_in
+    SERVICES ||--o{ CART_ITEMS : selected
 
     USERS {
         integer id PK
@@ -47,11 +52,31 @@ erDiagram
         integer id PK
         integer order_id FK
         integer membership_id FK
+        integer service_id FK
         decimal price
         integer quantity
         varchar label
         text title
         timestamptz created_at
+    }
+
+    SERVICES {
+        integer id PK
+        varchar name
+        text description
+        decimal price
+        varchar currency
+        boolean is_active
+    }
+
+    CART_ITEMS {
+        integer id PK
+        integer user_id FK
+        integer membership_id FK
+        integer service_id FK
+        integer quantity
+        decimal unit_price
+        varchar status
     }
 
     COACHES {
@@ -218,11 +243,20 @@ Stores individual line items associated with an order.
 | `id` | `SERIAL` integer | Yes | Automatically generated item identifier and primary key. |
 | `order_id` | `INTEGER` | Yes | Associated order. References `orders.id` with `ON DELETE CASCADE`. |
 | `membership_id` | `INTEGER` | No | Optional reference to `memberships.id`. |
+| `service_id` | `INTEGER` | No | Optional reference to `services.id` for an add-on purchase. |
 | `price` | `DECIMAL(10,2)` | Yes | Unit price charged at time of checkout. |
 | `quantity` | `INTEGER` | Yes | Quantity purchased (defaults to 1). |
 | `label` | `VARCHAR(100)` | Yes | Denormalized membership label for historical records. |
 | `title` | `TEXT` | No | Denormalized membership marketing title. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | No | Timestamp when the item was recorded. |
+
+### `services`
+
+Stores optional purchasable studio add-ons such as personal training or consultations. The public catalog only returns active rows. The server re-reads product prices from this table when adding a service to a cart and when calculating checkout totals.
+
+### `cart_items`
+
+Stores a signed-in member's saved products before checkout. Each row has a quantity and a unit-price snapshot, and references exactly one `membership` or one `service`. Rows can be `active`, `removed`, or `checked_out`. A verified successful Stripe webhook marks matching active rows as checked out; creating a Checkout Session alone does not clear the cart.
 
 ## Relationships And Rules
 

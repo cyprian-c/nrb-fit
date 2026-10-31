@@ -3,21 +3,15 @@ import { fetchOrder } from '../api/stripeClient.js'
 import OrderConfirmation from '../components/OrderConfirmation.jsx'
 
 export default function Success({ onGoToPortal, onBackToHome }) {
+  const sessionId = new URLSearchParams(window.location.search).get('session_id')
   const [order, setOrder] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(Boolean(sessionId))
+  const [error, setError] = useState(sessionId ? '' : 'No Stripe session ID was provided in the return URL.')
   const pollCountRef = useRef(0)
   const pollTimerRef = useRef(null)
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
-    const sessionId = searchParams.get('session_id')
-
-    if (!sessionId) {
-      setError('No Stripe session ID was provided in the return URL.')
-      setLoading(false)
-      return
-    }
+    if (!sessionId) return
 
     let isMounted = true
 
@@ -50,7 +44,7 @@ export default function Success({ onGoToPortal, onBackToHome }) {
         clearTimeout(pollTimerRef.current)
       }
     }
-  }, [])
+  }, [sessionId])
 
   return (
     <div className="flex min-h-[70vh] w-full items-center justify-center px-4 py-16">

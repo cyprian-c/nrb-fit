@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { fetchMemberships } from '../api/client.js'
-import { createCheckoutSession } from '../api/stripeClient.js'
 import { membershipPlans as fallbackMemberships } from '../data/siteData'
 import { useAuth } from '../context/AuthContext'
+import { useCart } from '../context/CartContext.jsx'
 import QuantityStepper from './QuantityStepper'
 
 // MembershipSection: shows the studio pricing with direct Stripe Checkout integration.
 export default function MembershipSection({ onOpenAuth }) {
   const { user } = useAuth()
+  const { addItem } = useCart()
   const [memberships, setMemberships] = useState(fallbackMemberships)
   const [quantities, setQuantities] = useState(() =>
     Object.fromEntries(fallbackMemberships.map((plan) => [plan.label, 1])),
@@ -54,7 +55,7 @@ export default function MembershipSection({ onOpenAuth }) {
     setQuantities((current) => ({ ...current, [label]: value }))
   }
 
-  const handleBuyNow = async (plan) => {
+  const handleAddToCart = async (plan) => {
     if (!user) {
       if (typeof onOpenAuth === 'function') {
         onOpenAuth()
@@ -69,14 +70,13 @@ export default function MembershipSection({ onOpenAuth }) {
     setCheckoutError('')
 
     try {
-      const response = await createCheckoutSession(plan.id, quantity)
-      if (response?.checkoutUrl) {
-        window.location.href = response.checkoutUrl
-      } else {
-        throw new Error('No checkout URL received from server.')
+      const result = await addItem('membership', plan.id, quantity)
+      if (!result.success) {
+        throw new Error(result.error || 'Could not add this package to your cart.')
       }
+      setCheckoutError(`${plan.label} added to your cart.`)
     } catch (err) {
-      setCheckoutError(err.message || 'Failed to initialize checkout session.')
+      setCheckoutError(err.message || 'Could not add this package to your cart.')
     } finally {
       setLoadingPlanId(null)
     }
@@ -157,11 +157,11 @@ export default function MembershipSection({ onOpenAuth }) {
                 />
                 <button
                   type="button"
-                  onClick={() => handleBuyNow(plan)}
+                  onClick={() => handleAddToCart(plan)}
                   disabled={isLoading || qty <= 0}
                   className="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-[#10110f] px-4 text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-xs transition-all duration-200 hover:bg-[#c8f31d] hover:text-[#10110f] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isLoading ? 'Processing...' : 'Buy Now'}
+                  {isLoading ? 'Adding...' : 'Add to cart'}
                 </button>
               </div>
             </article>

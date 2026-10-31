@@ -1,30 +1,25 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { useAuth } from './AuthContext.jsx'
 import { fetchCart, fetchServices, addToCart as apiAddToCart, updateCartItem as apiUpdateCartItem, removeFromCart as apiRemoveFromCart, clearCart as apiClearCart, getCartForCheckout } from '../api/stripeClient.js'
 
 const CartContext = createContext(null)
 
-export function CartProvider({ children, userId, onCartChanged }) {
+export function CartProvider({ children, onCartChanged }) {
+  const { user } = useAuth()
+  const userId = user?.id
   const [cartItems, setCartItems] = useState([])
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
   const [servicesLoading, setServicesLoading] = useState(true)
 
   // Load cart and services on mount or when user changes
-  useEffect(() => {
-    loadCart()
-    loadServices()
-  }, [userId])
-
-  // Notify parent when cart changes
-  useEffect(() => {
-    if (onCartChanged) {
-      onCartChanged(cartItems.length)
+  const loadCart = useCallback(async () => {
+    if (!userId) {
+      setCartItems([])
+      setLoading(false)
+      return
     }
-  }, [cartItems, onCartChanged])
 
-  async function loadCart() {
-    if (!userId) return
-    
     setLoading(true)
     try {
       const data = await fetchCart()
@@ -34,9 +29,9 @@ export function CartProvider({ children, userId, onCartChanged }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId])
 
-  async function loadServices() {
+  const loadServices = useCallback(async () => {
     setServicesLoading(true)
     try {
       const data = await fetchServices()
@@ -46,20 +41,41 @@ export function CartProvider({ children, userId, onCartChanged }) {
     } finally {
       setServicesLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    let isActive = true
+    queueMicrotask(() => {
+      if (isActive) {
+        loadCart()
+        loadServices()
+      }
+    })
+    return () => {
+      isActive = false
+    }
+  }, [loadCart, loadServices])
+
+  // Notify parent when cart changes
+  useEffect(() => {
+    if (onCartChanged) {
+      onCartChanged(cartItems.length)
+    }
+  }, [cartItems, onCartChanged])
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.total_price || item.quantity * item.unit_price), 0)
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
 
-  const addItem = useCallback(async (serviceId, quantity = 1) => {
+  const addItem = useCallback(async (itemType, productId, quantity = 1) => {
     try {
-      await apiAddToCart(serviceId, quantity)
+      await apiAddToCart(productId, quantity, itemType)
       await loadCart()
       return { success: true }
     } catch (err) {
       console.error('Failed to add to cart:', err)
       return { success: false, error: err.message }
     }
-  }, [])
+  }, [loadCart])
 
   const updateItem = useCallback(async (itemId, quantity) => {
     try {
@@ -70,7 +86,7 @@ export function CartProvider({ children, userId, onCartChanged }) {
       console.error('Failed to update cart item:', err)
       return { success: false, error: err.message }
     }
-  }, [])
+  }, [loadCart])
 
   const removeItem = useCallback(async (itemId) => {
     try {
@@ -81,7 +97,7 @@ export function CartProvider({ children, userId, onCartChanged }) {
       console.error('Failed to remove from cart:', err)
       return { success: false, error: err.message }
     }
-  }, [])
+  }, [loadCart])
 
   const clearAllItems = useCallback(async () => {
     try {
@@ -112,7 +128,7 @@ export function CartProvider({ children, userId, onCartChanged }) {
         loading,
         servicesLoading,
         subtotal,
-        itemCount: cartItems.length,
+        itemCount,
         addItem,
         updateItem,
         removeItem,
@@ -126,6 +142,7 @@ export function CartProvider({ children, userId, onCartChanged }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCart() {
   const context = useContext(CartContext)
   if (!context) {

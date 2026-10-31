@@ -11,11 +11,13 @@
  */
 
 import crypto from 'node:crypto'
-import { app } from '../index.js'
 import { query, pool } from '../config/db.js'
 
 async function runWebhookTest() {
   const port = 5096
+  const secret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test_secret'
+  process.env.STRIPE_WEBHOOK_SECRET = secret
+  const { app } = await import('../index.js')
   const server = app.listen(port)
 
   try {
@@ -51,7 +53,6 @@ async function runWebhookTest() {
     })
 
     const timestamp = Math.floor(Date.now() / 1000)
-    const secret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test_secret'
     const signedPayload = `${timestamp}.${payload}`
     const signature = crypto.createHmac('sha256', secret).update(signedPayload).digest('hex')
     const header = `t=${timestamp},v1=${signature}`

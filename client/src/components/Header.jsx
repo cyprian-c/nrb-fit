@@ -1,7 +1,8 @@
 import { useAuth } from '../context/AuthContext.jsx'
+import { ShoppingBagIcon } from './icons.jsx'
 
 // Header: sleek athletic branding, responsive view switching, and accent-hover interactions.
-export default function Header({ onOpenAuth, currentView = 'studio', onSelectView }) {
+export default function Header({ onOpenAuth, onOpenCart, cartCount = 0, currentView = 'studio', onSelectView }) {
   const { user, logout } = useAuth()
 
   const firstName = user?.full_name ? user.full_name.split(' ')[0] : 'Member'
@@ -83,6 +84,15 @@ export default function Header({ onOpenAuth, currentView = 'studio', onSelectVie
 
         {/* Action Controls */}
         <div className="flex items-center gap-2.5 sm:gap-3">
+          <button
+            type="button"
+            onClick={onOpenCart}
+            aria-label={`Open shopping cart, ${cartCount} items`}
+            className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-2.5 text-[9px] font-bold uppercase tracking-[0.06em] text-[#10110f] transition hover:border-[#c8f31d] hover:bg-[#c8f31d] sm:px-3 sm:text-[9.5px]"
+          >
+            <ShoppingBagIcon className="h-4 w-4" />
+            <span>Cart{cartCount > 0 ? ` (${cartCount})` : ''}</span>
+          </button>
           {user ? (
             <div className="flex items-center gap-2.5 sm:gap-3">
               {/* Member Avatar */}

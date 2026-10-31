@@ -21,6 +21,6 @@ export const stripe = new Stripe(stripeSecretKey, {
 
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || ''
 export const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY || ''
-export const isStripeConfigured = Boolean(
-  process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('placeholder')
+export const isStripeConfigured = /^(sk|rk)_(test|live)_[A-Za-z0-9]+$/.test(
+  process.env.STRIPE_SECRET_KEY || '',
 )

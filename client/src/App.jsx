@@ -3,8 +3,10 @@ import Header from './components/Header'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
 import { useAuth } from './context/AuthContext'
+import { useCart } from './context/CartContext.jsx'
 
 const ProgramsTeaserSection = lazy(() => import('./components/ProgramsTeaserSection'))
+const ServicesSection = lazy(() => import('./components/ServicesSection'))
 const ClassScheduleSection = lazy(() => import('./components/ClassScheduleSection'))
 const CoachSection = lazy(() => import('./components/CoachSection'))
 const MembershipSection = lazy(() => import('./components/MembershipSection'))
@@ -12,6 +14,7 @@ const ContactSection = lazy(() => import('./components/ContactSection'))
 const MemberPortal = lazy(() => import('./components/portal/MemberPortal'))
 const AuthModal = lazy(() => import('./components/AuthModal'))
 const Success = lazy(() => import('./pages/Success'))
+const CartDrawer = lazy(() => import('./components/CartDrawer'))
 
 function SectionLoadingFallback() {
   return (
@@ -28,7 +31,9 @@ function SectionLoadingFallback() {
 
 function App() {
   const { user } = useAuth()
+  const { itemCount } = useCart()
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
   const [currentView, setCurrentView] = useState(() => {
     if (typeof window !== 'undefined') {
       if (window.location.pathname.startsWith('/success') || window.location.search.includes('session_id')) {
@@ -78,6 +83,8 @@ function App() {
     <div className="min-h-screen overflow-x-hidden bg-white text-[#10110f] antialiased">
       <Header
         onOpenAuth={() => setAuthModalOpen(true)}
+        onOpenCart={() => user ? setCartOpen(true) : setAuthModalOpen(true)}
+        cartCount={itemCount}
         currentView={currentView}
         onSelectView={handleSelectView}
       />
@@ -102,6 +109,7 @@ function App() {
                 <ClassScheduleSection onOpenAuth={() => setAuthModalOpen(true)} />
                 <CoachSection />
                 <MembershipSection onOpenAuth={() => setAuthModalOpen(true)} />
+                <ServicesSection onOpenAuth={() => setAuthModalOpen(true)} />
               </div>
               <ContactSection />
             </>
@@ -112,6 +120,7 @@ function App() {
       <Footer />
 
       <Suspense fallback={null}>
+        {cartOpen && <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />}
         {authModalOpen && (
           <AuthModal
             isOpen={authModalOpen}

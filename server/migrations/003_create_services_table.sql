@@ -21,7 +21,10 @@ CREATE INDEX IF NOT EXISTS idx_services_category ON services(category);
 CREATE INDEX IF NOT EXISTS idx_services_name ON services(name);
 
 -- Sample seed data for services (CAT - Custom Add-ons / Trials)
-INSERT INTO services (name, description, price, currency, duration_minutes, category, is_active) VALUES
+INSERT INTO services (name, description, price, currency, duration_minutes, category, is_active)
+SELECT seed.name, seed.description, seed.price, seed.currency,
+       seed.duration_minutes, seed.category, seed.is_active
+FROM (VALUES
   ('Personal Training Session', 'One-on-one coaching session with a certified trainer', 3500.00, 'kes', 60, 'Training', true),
   ('Nutrition Consultation', 'Personalized nutrition plan and guidance', 5000.00, 'kes', 45, 'Wellness', true),
   ('Yoga Class - Group', 'Group yoga session for beginners to advanced', 2000.00, 'kes', 90, 'Wellness', true),
@@ -33,4 +36,8 @@ INSERT INTO services (name, description, price, currency, duration_minutes, cate
   ('Group Fitness Class', 'Attend a specialized group fitness class', 1500.00, 'kes', 60, 'Training', true),
   ('Recovery Session', 'Recovery and stretching session', 2500.00, 'kes', 45, 'Wellness', true),
   ('Dance Class', 'Learn various dance styles', 2000.00, 'kes', 60, 'Entertainment', true),
-  ('Martial Arts Session', 'Traditional martial arts training', 3000.00, 'kes', 60, 'Training', true);
+  ('Martial Arts Session', 'Traditional martial arts training', 3000.00, 'kes', 60, 'Training', true)
+) AS seed(name, description, price, currency, duration_minutes, category, is_active)
+WHERE NOT EXISTS (
+  SELECT 1 FROM services AS existing WHERE existing.name = seed.name
+);

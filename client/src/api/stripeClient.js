@@ -15,10 +15,9 @@ export async function createCheckoutSession(membershipId, quantity = 1, services
  * Creates a Stripe Checkout Session for cart items (memberships + services)
  * Returns { checkoutUrl, sessionId, orderId }
  */
-export async function createCartCheckoutSession(membershipId, quantity = 1, serviceIds = []) {
-  return apiFetch('/checkout/create', {
+export async function createCartCheckoutSession() {
+  return apiFetch('/checkout/cart', {
     method: 'POST',
-    body: { membership_id: membershipId, quantity, services: serviceIds },
   })
 }
 
@@ -50,10 +49,13 @@ export async function fetchCart() {
 /**
  * Add item to cart
  */
-export async function addToCart(serviceId, quantity = 1) {
+export async function addToCart(productId, quantity = 1, itemType = 'service') {
   return apiFetch('/cart', {
     method: 'POST',
-    body: { service_id: serviceId, quantity },
+    body: {
+      [itemType === 'membership' ? 'membership_id' : 'service_id']: productId,
+      quantity,
+    },
   })
 }
 

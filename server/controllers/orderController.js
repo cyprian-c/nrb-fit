@@ -76,7 +76,7 @@ export async function getOrderById(req, res, next) {
 
     // Optionally retrieve order_items breakdown
     const itemsResult = await query(
-      'SELECT id, membership_id, price, quantity, label, title, created_at FROM order_items WHERE order_id = $1',
+      'SELECT id, membership_id, service_id, price, quantity, label, title, created_at FROM order_items WHERE order_id = $1',
       [order.id],
     )
 
