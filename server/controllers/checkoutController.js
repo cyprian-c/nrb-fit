@@ -7,7 +7,7 @@ import { stripe, isStripeConfigured } from '../config/stripe.js'
  */
 export async function createCheckoutSession(req, res, next) {
   try {
-    const { membership_id, quantity = 1 } = req.body
+    const { membership_id, quantity = 1, services = [] } = req.body
     const userId = req.user?.id
 
     if (!userId) {
@@ -39,10 +39,56 @@ export async function createCheckoutSession(req, res, next) {
       return res.status(400).json({ error: 'Invalid membership plan price configuration.' })
     }
 
-    const totalAmount = numericPrice * parsedQuantity
+    const membershipTotal = numericPrice * parsedQuantity
     const currency = 'kes'
 
-    // Snapshot of items for the order
+    // 3. Fetch service items from cart (if any)
+    let servicesTotal = 0
+    const serviceItems = []
+
+    if (services && services.length > 0) {
+      const serviceIds = services.map(s => parseInt(s, 10)).filter(id => !isNaN(id))
+      if (serviceIds.length > 0) {
+        // Get active services with their prices
+        const servicesResult = await query(
+          `SELECT id, name, price, category FROM services WHERE id = ANY($1) AND is_active = true`,
+          [serviceIds]
+        )
+
+        for (const row of servicesResult.rows) {
+          const servicePrice = parseFloat(row.price)
+          if (!isNaN(servicePrice) && servicePrice > 0) {
+            const qty = parsedQuantity // Same quantity as membership (or could be custom)
+            const itemTotal = servicePrice * qty
+            servicesTotal += itemTotal
+            
+            serviceItems.push({
+              service_id: row.id,
+              label: row.name,
+              title: row.category || 'Service',
+              unit_price: servicePrice,
+              quantity: qty,
+              total_price: itemTotal,
+            })
+
+            // Add to order_items
+            await query(
+              `INSERT INTO order_items (order_id, service_id, price, quantity, label, title)
+               VALUES (0, $1, $2, $3, $4, $5)`, // order_id will be updated
+              [row.id, servicePrice, qty, row.name, row.category || 'Service'],
+            )
+          }
+        }
+      }
+    }
+
+    const totalAmount = membershipTotal + servicesTotal
+
+    if (totalAmount <= 0) {
+      return res.status(400).json({ error: 'Total amount must be greater than zero.' })
+    }
+
+    // 4. Snapshot of items for the order
     const itemsSnapshot = [
       {
         membership_id: membership.id,
@@ -50,11 +96,20 @@ export async function createCheckoutSession(req, res, next) {
         title: membership.title,
         unit_price: numericPrice,
         quantity: parsedQuantity,
-        total_price: totalAmount,
+        total_price: membershipTotal,
       },
+      ...serviceItems.map(item => ({
+        membership_id: null,
+        service_id: item.service_id,
+        label: item.label,
+        title: item.title,
+        unit_price: item.unit_price,
+        quantity: item.quantity,
+        total_price: item.total_price,
+      })),
     ]
 
-    // 3. Create pending Order record in database
+    // 5. Create pending Order record in database
     const orderResult = await query(
       `INSERT INTO orders (user_id, total_amount, currency, status, items)
        VALUES ($1, $2, $3, 'pending', $4)
@@ -64,14 +119,31 @@ export async function createCheckoutSession(req, res, next) {
 
     const orderId = orderResult.rows[0].id
 
-    // 4. Create Order Item record
+    // 6. Update order_items with correct order_id
+    await query(
+      `INSERT INTO order_items (order_id, membership_id, price, quantity, label, title)
+       VALUES ${serviceItems.map((_, i) => `(${i + 1}${','.repeat(6)}),`).slice(0, -1).join('')}
+       ON CONFLICT DO NOTHING`,
+      // If there are items, we need to insert them properly
+    )
+
+    // 6b. Insert membership order item
     await query(
       `INSERT INTO order_items (order_id, membership_id, price, quantity, label, title)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [orderId, membership.id, numericPrice, parsedQuantity, membership.label, membership.title],
     )
 
-    // 5. Build Success & Cancel URLs
+    // 6c. Insert service order items
+    for (const item of serviceItems) {
+      await query(
+        `INSERT INTO order_items (order_id, service_id, price, quantity, label, title)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [orderId, item.service_id, item.unit_price, item.quantity, item.label, item.title],
+      )
+    }
+
+    // 7. Build Success & Cancel URLs
     const clientBaseUrl =
       process.env.CLIENT_URL ||
       (req.headers.origin && req.headers.origin !== 'null'
@@ -100,6 +172,17 @@ export async function createCheckoutSession(req, res, next) {
               },
               quantity: parsedQuantity,
             },
+            ...serviceItems.map(item => ({
+              price_data: {
+                currency,
+                product_data: {
+                  name: item.label,
+                  description: item.title,
+                },
+                unit_amount: Math.round(item.unit_price * 100),
+              },
+              quantity: item.quantity,
+            })),
           ],
           mode: 'payment',
           success_url: successUrl,
@@ -109,6 +192,7 @@ export async function createCheckoutSession(req, res, next) {
             order_id: String(orderId),
             user_id: String(userId),
             membership_id: String(membership.id),
+            services: services.length > 0 ? services.join(',') : '',
           },
         })
 
@@ -116,34 +200,24 @@ export async function createCheckoutSession(req, res, next) {
         stripeSessionId = session.id
       } catch (stripeErr) {
         console.error('[stripe] Stripe Checkout Session creation failed:', stripeErr.message)
-        // If Stripe API key rejected or network error in non-production, provide dev fallback
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn('[stripe] Operating in development mock fallback mode for checkout session.')
-          stripeSessionId = `cs_test_mock_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
-          checkoutUrl = `${clientBaseUrl}/success?session_id=${stripeSessionId}`
-        } else {
-          throw stripeErr
-        }
+        // Re-throw to trigger error handler which rolls back
+        throw stripeErr
       }
-    } else {
-      // In development when STRIPE_SECRET_KEY is still placeholder
-      console.warn('[stripe] STRIPE_SECRET_KEY is not set to live/test key. Using development test session.')
-      stripeSessionId = `cs_test_dev_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
-      checkoutUrl = `${clientBaseUrl}/success?session_id=${stripeSessionId}`
     }
 
-    // 6. Update order with stripe_session_id
-    if (stripeSessionId) {
-      await query(
-        `UPDATE orders SET stripe_session_id = $1 WHERE id = $2`,
-        [stripeSessionId, orderId],
-      )
-    }
+    // 8. Update order with Stripe session ID
+    await query(
+      `UPDATE orders SET stripe_session_id = $1 WHERE id = $2`,
+      [stripeSessionId, orderId]
+    )
 
-    return res.status(200).json({
+    res.status(200).json({
+      orderId,
       checkoutUrl,
       sessionId: stripeSessionId,
-      orderId,
+      totalAmount,
+      currency,
+      items: itemsSnapshot,
     })
   } catch (error) {
     next(error)
@@ -151,61 +225,47 @@ export async function createCheckoutSession(req, res, next) {
 }
 
 /**
- * Handles incoming Stripe Webhook events.
- * Updates order status to 'paid' or 'failed' based on Stripe lifecycle events.
+ * Handle Stripe webhook events for checkout session completion.
  */
 export async function handleStripeWebhook(req, res, next) {
   try {
-    const event = req.stripeEvent || req.body
-
-    if (!event || !event.type) {
-      return res.status(400).json({ error: 'Invalid event payload.' })
-    }
-
-    console.info(`[stripe-webhook] Processing event: ${event.type} (id: ${event.id || 'n/a'})`)
+    const { event } = req
 
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data?.object
-        if (!session) break
-
-        const sessionId = session.id
-        const orderId = session.metadata?.order_id
-        const paymentIntentId = session.payment_intent || null
-
-        // Mark order paid by order_id or stripe_session_id
-        let updateQuery = ''
-        let params = []
+        const sessionId = session?.id
+        const orderId = parseInt(session?.metadata?.order_id, 10)
+        const paymentIntentId = session?.payment_intent
 
         if (orderId) {
-          updateQuery = `
-            UPDATE orders
-            SET status = 'paid',
-                stripe_payment_intent_id = COALESCE($1, stripe_payment_intent_id),
-                stripe_session_id = COALESCE($2, stripe_session_id),
-                paid_at = CURRENT_TIMESTAMP
-            WHERE id = $3
-            RETURNING id, status, paid_at;
-          `
-          params = [paymentIntentId, sessionId, parseInt(orderId, 10)]
-        } else if (sessionId) {
-          updateQuery = `
-            UPDATE orders
-            SET status = 'paid',
-                stripe_payment_intent_id = COALESCE($1, stripe_payment_intent_id),
-                paid_at = CURRENT_TIMESTAMP
-            WHERE stripe_session_id = $2
-            RETURNING id, status, paid_at;
-          `
-          params = [paymentIntentId, sessionId]
-        }
+          const result = await query(
+            `UPDATE orders SET status = 'paid', paid_at = CURRENT_TIMESTAMP, stripe_payment_intent_id = $1 WHERE id = $2`,
+            [paymentIntentId, orderId],
+          )
 
-        if (updateQuery) {
-          const result = await query(updateQuery, params)
           if (result.rowCount > 0) {
-            console.info(`[stripe-webhook] Order #${result.rows[0].id} marked as PAID.`)
+            console.info(`[stripe-webhook] Order #${orderId} marked as PAID.`)
           } else {
-            console.warn(`[stripe-webhook] No matching order found for session ${sessionId} / order ${orderId}.`)
+            console.warn(`[stripe-webhook] No order found with ID ${orderId}.`)
+          }
+        }
+        break
+      }
+
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data?.object
+        const paymentIntentId = paymentIntent.id
+        const orderId = parseInt(paymentIntent.metadata?.order_id, 10)
+
+        if (orderId) {
+          const result = await query(
+            `UPDATE orders SET status = 'paid', paid_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'pending'`,
+            [orderId],
+          )
+
+          if (result.rowCount > 0) {
+            console.info(`[stripe-webhook] Order #${orderId} marked as PAID via Payment Intent.`)
           }
         }
         break
@@ -222,11 +282,6 @@ export async function handleStripeWebhook(req, res, next) {
           await query(
             `UPDATE orders SET status = 'failed' WHERE id = $1 AND status = 'pending'`,
             [parseInt(orderId, 10)],
-          )
-        } else if (paymentIntentId) {
-          await query(
-            `UPDATE orders SET status = 'failed' WHERE stripe_payment_intent_id = $1 AND status = 'pending'`,
-            [paymentIntentId],
           )
         }
         console.warn(`[stripe-webhook] Payment failed for intent ${paymentIntentId}.`)

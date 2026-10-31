@@ -7,13 +7,14 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import authRoutes from './routes/authRoutes.js'
 import bookingRoutes from './routes/bookingRoutes.js'
+import cartRoutes from './routes/cartRoutes.js'
+import checkoutRoutes from './routes/checkoutRoutes.js'
 import classRoutes from './routes/classRoutes.js'
 import coachRoutes from './routes/coachRoutes.js'
 import enquiryRoutes from './routes/enquiryRoutes.js'
 import membershipRoutes from './routes/membershipRoutes.js'
-import portalRoutes from './routes/portalRoutes.js'
-import checkoutRoutes from './routes/checkoutRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
+import portalRoutes from './routes/portalRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -97,13 +98,14 @@ app.get('/api/health', (request, response) => {
 // Public studio data routes are mounted before the final error handler.
 app.use('/api/auth', authRoutes)
 app.use('/api/bookings', bookingRoutes)
+app.use('/api/cart', cartRoutes)
 app.use('/api/classes', classRoutes)
 app.use('/api/coaches', coachRoutes)
-app.use('/api/memberships', membershipRoutes)
 app.use('/api/enquiries', enquiryRoutes)
+app.use('/api/memberships', membershipRoutes)
+app.use('/api/orders', orderRoutes)
 app.use('/api/portal', portalRoutes)
 app.use('/api/checkout', checkoutRoutes)
-app.use('/api/orders', orderRoutes)
 
 // Serve frontend client dist in production if available (workspace build or public dir)
 const distCandidates = [
