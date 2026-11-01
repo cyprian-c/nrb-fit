@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
 import { fetchMemberships } from '../api/client.js'
 import { membershipPlans as fallbackMemberships } from '../data/siteData'
-import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext.jsx'
 import QuantityStepper from './QuantityStepper'
 
 // MembershipSection: shows the studio pricing with direct Stripe Checkout integration.
-export default function MembershipSection({ onOpenAuth }) {
-  const { user } = useAuth()
+export default function MembershipSection() {
   const { addItem } = useCart()
   const [memberships, setMemberships] = useState(fallbackMemberships)
   const [quantities, setQuantities] = useState(() =>
@@ -15,6 +13,7 @@ export default function MembershipSection({ onOpenAuth }) {
   )
   const [loadingPlanId, setLoadingPlanId] = useState(null)
   const [checkoutError, setCheckoutError] = useState('')
+  const [cartMessage, setCartMessage] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -56,25 +55,19 @@ export default function MembershipSection({ onOpenAuth }) {
   }
 
   const handleAddToCart = async (plan) => {
-    if (!user) {
-      if (typeof onOpenAuth === 'function') {
-        onOpenAuth()
-      }
-      return
-    }
-
     const quantity = quantities[plan.label] ?? 1
     if (quantity <= 0) return
 
     setLoadingPlanId(plan.id || plan.label)
     setCheckoutError('')
+    setCartMessage('')
 
     try {
-      const result = await addItem('membership', plan.id, quantity)
+      const result = await addItem('membership', plan.id, quantity, plan)
       if (!result.success) {
         throw new Error(result.error || 'Could not add this package to your cart.')
       }
-      setCheckoutError(`${plan.label} added to your cart.`)
+      setCartMessage(`${plan.label} added to your cart.`)
     } catch (err) {
       setCheckoutError(err.message || 'Could not add this package to your cart.')
     } finally {
@@ -104,6 +97,7 @@ export default function MembershipSection({ onOpenAuth }) {
           {checkoutError}
         </div>
       )}
+      {cartMessage && <p className="mb-4 text-xs font-semibold text-[#50524d]" role="status">{cartMessage}</p>}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {memberships.map((plan) => {

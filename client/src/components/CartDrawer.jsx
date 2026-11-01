@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createCartCheckoutSession } from '../api/stripeClient.js'
+import { useAuth } from '../context/AuthContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
 import { CloseIcon } from './icons.jsx'
 
@@ -9,7 +10,8 @@ const formatPrice = (amount) => new Intl.NumberFormat('en-KE', {
   maximumFractionDigits: 0,
 }).format(amount)
 
-export default function CartDrawer({ open, onClose }) {
+export default function CartDrawer({ open, onClose, onRequireAuth }) {
+  const { user, loading: authLoading } = useAuth()
   const { cartItems, loading, subtotal, updateItem, removeItem, clearAllItems } = useCart()
   const [checkoutError, setCheckoutError] = useState('')
   const [isCheckingOut, setIsCheckingOut] = useState(false)
@@ -17,6 +19,11 @@ export default function CartDrawer({ open, onClose }) {
   if (!open) return null
 
   async function beginCheckout() {
+    if (!user) {
+      onRequireAuth?.()
+      return
+    }
+
     setCheckoutError('')
     setIsCheckingOut(true)
     try {
@@ -114,8 +121,8 @@ export default function CartDrawer({ open, onClose }) {
             <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#555750]">Subtotal</span>
             <span className="font-[Barlow_Condensed] text-2xl font-bold text-[#10110f]">{formatPrice(subtotal)}</span>
           </div>
-          <button type="button" onClick={beginCheckout} disabled={loading || cartItems.length === 0 || isCheckingOut} className="h-11 w-full cursor-pointer bg-[#10110f] px-4 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f] disabled:cursor-not-allowed disabled:opacity-50">
-            {isCheckingOut ? 'Connecting to Stripe...' : 'Checkout securely'}
+          <button type="button" onClick={beginCheckout} disabled={loading || authLoading || cartItems.length === 0 || isCheckingOut} className="h-11 w-full cursor-pointer bg-[#10110f] px-4 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#c8f31d] hover:text-[#10110f] disabled:cursor-not-allowed disabled:opacity-50">
+            {isCheckingOut ? 'Connecting to Stripe...' : user ? 'Checkout securely' : 'Sign in to checkout'}
           </button>
           {cartItems.length > 0 && (
             <button type="button" onClick={clearCart} className="mt-3 w-full cursor-pointer py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-[#777a73] hover:text-[#10110f]">

@@ -1,22 +1,15 @@
 import { useState } from 'react'
-import { useAuth } from '../context/AuthContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
 
-export default function ServicesSection({ onOpenAuth }) {
-	const { user } = useAuth()
+export default function ServicesSection() {
 	const { services, servicesLoading, addItem } = useCart()
 	const [addingServiceId, setAddingServiceId] = useState(null)
 	const [message, setMessage] = useState('')
 
 	async function handleAdd(service) {
-		if (!user) {
-			onOpenAuth?.()
-			return
-		}
-
 		setAddingServiceId(service.id)
 		setMessage('')
-		const result = await addItem('service', service.id)
+		const result = await addItem('service', service.id, 1, service)
 		setMessage(result.success ? `${service.name} added to your cart.` : result.error)
 		setAddingServiceId(null)
 	}

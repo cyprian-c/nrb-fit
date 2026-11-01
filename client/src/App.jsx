@@ -83,7 +83,7 @@ function App() {
     <div className="min-h-screen overflow-x-hidden bg-white text-[#10110f] antialiased">
       <Header
         onOpenAuth={() => setAuthModalOpen(true)}
-        onOpenCart={() => user ? setCartOpen(true) : setAuthModalOpen(true)}
+        onOpenCart={() => setCartOpen(true)}
         cartCount={itemCount}
         currentView={currentView}
         onSelectView={handleSelectView}
@@ -108,8 +108,8 @@ function App() {
                 />
                 <ClassScheduleSection onOpenAuth={() => setAuthModalOpen(true)} />
                 <CoachSection />
-                <MembershipSection onOpenAuth={() => setAuthModalOpen(true)} />
-                <ServicesSection onOpenAuth={() => setAuthModalOpen(true)} />
+                <MembershipSection />
+                <ServicesSection />
               </div>
               <ContactSection />
             </>
@@ -120,7 +120,13 @@ function App() {
       <Footer />
 
       <Suspense fallback={null}>
-        {cartOpen && <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />}
+        {cartOpen && (
+          <CartDrawer
+            open={cartOpen}
+            onClose={() => setCartOpen(false)}
+            onRequireAuth={() => setAuthModalOpen(true)}
+          />
+        )}
         {authModalOpen && (
           <AuthModal
             isOpen={authModalOpen}
