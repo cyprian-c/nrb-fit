@@ -15,12 +15,12 @@ dotenv.config()
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder_replace_with_actual_key'
 
-export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2024-12-18.acacia',
-})
+export const stripe = new Stripe(stripeSecretKey)
 
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || ''
 export const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY || ''
 export const isStripeConfigured = /^(sk|rk)_(test|live)_[A-Za-z0-9]+$/.test(
   process.env.STRIPE_SECRET_KEY || '',
 )
+
+export default stripe

@@ -6,7 +6,7 @@
  * Simulates Stripe CLI webhook delivery:
  * 1. Creates a pending order in PostgreSQL
  * 2. Generates a signed checkout.session.completed event (with HMAC-SHA256 signature)
- * 3. Sends the event to /api/checkout/webhook
+ * 3. Sends the event to /api/webhooks/stripe
  * 4. Verifies the order status is updated to 'paid'
  */
 
@@ -57,8 +57,8 @@ async function runWebhookTest() {
     const signature = crypto.createHmac('sha256', secret).update(signedPayload).digest('hex')
     const header = `t=${timestamp},v1=${signature}`
 
-    console.log('[test-webhook] 3. Sending webhook to http://localhost:' + port + '/api/checkout/webhook ...')
-    const response = await fetch(`http://localhost:${port}/api/checkout/webhook`, {
+    console.log('[test-webhook] 3. Sending webhook to http://localhost:' + port + '/api/webhooks/stripe ...')
+    const response = await fetch(`http://localhost:${port}/api/webhooks/stripe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -150,7 +150,6 @@ export async function createCheckoutSession(req, res, next) {
     if (isStripeConfigured) {
       try {
         const session = await stripe.checkout.sessions.create({
-          payment_method_types: ['card'],
           line_items: [
             {
               price_data: {
@@ -197,7 +196,10 @@ export async function createCheckoutSession(req, res, next) {
         stripeSessionId = session.id
       } catch (stripeErr) {
         console.error('[stripe] Stripe Checkout Session creation failed:', stripeErr.message)
-        // Re-throw to trigger error handler which rolls back
+        await query(
+          `UPDATE orders SET status = 'failed' WHERE id = $1 AND status = 'pending'`,
+          [orderId],
+        )
         throw stripeErr
       }
     }
@@ -276,7 +278,7 @@ export async function createCartCheckoutSession(req, res, next) {
       `INSERT INTO orders (user_id, total_amount, currency, status, items)
        VALUES ($1, $2, $3, 'pending', $4)
        RETURNING id`,
-      [userId, totalAmount, currency, JSON.stringify(itemsSnapshot)],
+      [userId, totalAmount, currency, JSON.stringify(items)],
     )
     const orderId = orderResult.rows[0].id
 
@@ -292,28 +294,37 @@ export async function createCartCheckoutSession(req, res, next) {
       process.env.CLIENT_URL ||
       (req.headers.origin && req.headers.origin !== 'null' ? req.headers.origin : 'http://localhost:5173')
     ).split(',')[0].trim().replace(/\/+$/, '')
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: items.map((item) => ({
-        price_data: {
-          currency,
-          product_data: {
-            name: item.label,
-            description: item.title || undefined,
+    let session
+    try {
+      session = await stripe.checkout.sessions.create({
+        line_items: items.map((item) => ({
+          price_data: {
+            currency,
+            product_data: {
+              name: item.label,
+              description: item.title || undefined,
+            },
+            unit_amount: Math.round(item.unit_price * 100),
           },
-          unit_amount: Math.round(item.unit_price * 100),
+          quantity: item.quantity,
+        })),
+        mode: 'payment',
+        success_url: `${clientBaseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${clientBaseUrl}/#memberships`,
+        customer_email: req.user.email,
+        payment_intent_data: {
+          metadata: { order_id: String(orderId), user_id: String(userId) },
         },
-        quantity: item.quantity,
-      })),
-      mode: 'payment',
-      success_url: `${clientBaseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${clientBaseUrl}/#memberships`,
-      customer_email: req.user.email,
-      payment_intent_data: {
-        metadata: { order_id: String(orderId), user_id: String(userId) },
-      },
-      metadata: { order_id: String(orderId), user_id: String(userId), cart_checkout: 'true' },
-    })
+        metadata: { order_id: String(orderId), user_id: String(userId), cart_checkout: 'true' },
+      })
+    } catch (stripeErr) {
+      console.error('[stripe] Cart Checkout Session creation failed:', stripeErr.message)
+      await query(
+        `UPDATE orders SET status = 'failed' WHERE id = $1 AND status = 'pending'`,
+        [orderId],
+      )
+      throw stripeErr
+    }
 
     await query('UPDATE orders SET stripe_session_id = $1 WHERE id = $2', [session.id, orderId])
 
@@ -330,9 +341,47 @@ export async function createCartCheckoutSession(req, res, next) {
   }
 }
 
-/**
- * Handle Stripe webhook events for checkout session completion.
- */
+async function fulfillPaidCheckoutSession(session) {
+  const orderId = Number.parseInt(session?.metadata?.order_id, 10)
+  if (!orderId || session.payment_status !== 'paid') return null
+
+  const paymentIntentId = typeof session.payment_intent === 'string'
+    ? session.payment_intent
+    : session.payment_intent?.id || null
+
+  const result = await query(
+    `WITH paid_order AS (
+       UPDATE orders
+       SET status = 'paid', paid_at = CURRENT_TIMESTAMP, stripe_session_id = $3,
+           stripe_payment_intent_id = $1
+       WHERE id = $2 AND (stripe_session_id = $3 OR stripe_session_id IS NULL)
+         AND status = 'pending'
+         AND LOWER(currency) = LOWER($4)
+         AND ROUND(total_amount * 100)::BIGINT = $5
+       RETURNING id, user_id, items
+     ), checked_out_cart AS (
+       UPDATE cart_items ci
+       SET status = 'checked_out', updated_at = CURRENT_TIMESTAMP
+       FROM paid_order po
+       WHERE ci.user_id = po.user_id AND ci.status = 'active'
+         AND ci.id IN (
+           SELECT (line_item.item->>'cart_item_id')::INTEGER
+           FROM jsonb_array_elements(po.items) AS line_item(item)
+           WHERE line_item.item ? 'cart_item_id'
+         )
+       RETURNING ci.id
+     )
+     SELECT po.id, COUNT(checked_out_cart.id)::INTEGER AS checked_out_count
+     FROM paid_order po
+     LEFT JOIN checked_out_cart ON TRUE
+     GROUP BY po.id`,
+    [paymentIntentId, orderId, session.id, session.currency || '', session.amount_total],
+  )
+
+  return result.rows[0] || null
+}
+
+/** Fulfill Checkout Sessions only after Stripe confirms payment. */
 export async function handleStripeWebhook(req, res, next) {
   try {
     const event = req.stripeEvent
@@ -343,72 +392,65 @@ export async function handleStripeWebhook(req, res, next) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data?.object
-        const sessionId = session?.id
-        const orderId = parseInt(session?.metadata?.order_id, 10)
-        const paymentIntentId = session?.payment_intent
+        if (session?.payment_status !== 'paid') {
+          console.info(`[stripe-webhook] Checkout Session ${session?.id || '(unknown)'} is not paid yet.`)
+          break
+        }
 
-        if (orderId) {
-          const result = await query(
-            `UPDATE orders
-             SET status = 'paid', paid_at = CURRENT_TIMESTAMP, stripe_payment_intent_id = $1
-             WHERE id = $2 AND stripe_session_id = $3 AND status = 'pending'`,
-            [paymentIntentId, orderId, sessionId],
-          )
+        const fulfilledOrder = await fulfillPaidCheckoutSession(session)
+        if (fulfilledOrder) {
+          console.info(`[stripe-webhook] Order #${fulfilledOrder.id} marked as PAID.`)
+          break
+        }
 
-          if (result.rowCount > 0) {
-            await query(
-              `UPDATE cart_items ci
-               SET status = 'checked_out', updated_at = CURRENT_TIMESTAMP
-               WHERE ci.user_id = (SELECT user_id FROM orders WHERE id = $1)
-                 AND ci.status = 'active'
-                 AND EXISTS (
-                   SELECT 1 FROM order_items oi
-                   WHERE oi.order_id = $2 AND oi.quantity = ci.quantity
-                     AND ((oi.membership_id IS NOT NULL AND oi.membership_id = ci.membership_id)
-                       OR (oi.service_id IS NOT NULL AND oi.service_id = ci.service_id))
-                 )`,
-              [orderId, orderId],
-            )
-            console.info(`[stripe-webhook] Order #${orderId} marked as PAID.`)
-          } else {
-            console.warn(`[stripe-webhook] No order found with ID ${orderId}.`)
+        const orderId = Number.parseInt(session?.metadata?.order_id, 10)
+        const existingOrder = orderId
+          ? await query('SELECT status, stripe_session_id FROM orders WHERE id = $1', [orderId])
+          : { rows: [] }
+        const existing = existingOrder.rows[0]
+
+        if (existing?.status === 'paid' && existing.stripe_session_id === session.id) {
+          console.info(`[stripe-webhook] Duplicate paid event for order #${orderId}.`)
+          break
+        }
+
+        console.error(`[stripe-webhook] Could not reconcile paid Checkout Session ${session?.id || '(unknown)'}.`)
+        return res.status(500).json({ error: 'Paid Checkout Session could not be reconciled with an order.' })
+      }
+
+      case 'checkout.session.async_payment_succeeded': {
+        const session = event.data?.object
+        if (session?.payment_status === 'paid') {
+          const fulfilledOrder = await fulfillPaidCheckoutSession(session)
+          if (fulfilledOrder) {
+            console.info(`[stripe-webhook] Order #${fulfilledOrder.id} marked as PAID after delayed payment.`)
+            break
           }
+
+          const orderId = Number.parseInt(session?.metadata?.order_id, 10)
+          const existingOrder = orderId
+            ? await query('SELECT status, stripe_session_id FROM orders WHERE id = $1', [orderId])
+            : { rows: [] }
+          const existing = existingOrder.rows[0]
+          if (existing?.status === 'paid' && existing.stripe_session_id === session.id) break
+
+          return res.status(500).json({ error: 'Paid Checkout Session could not be reconciled with an order.' })
         }
         break
       }
 
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data?.object
-        const paymentIntentId = paymentIntent.id
-        const orderId = parseInt(paymentIntent.metadata?.order_id, 10)
-
-        if (orderId) {
-          const result = await query(
-            `UPDATE orders SET status = 'paid', paid_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'pending'`,
-            [orderId],
-          )
-
-          if (result.rowCount > 0) {
-            console.info(`[stripe-webhook] Order #${orderId} marked as PAID via Payment Intent.`)
-          }
-        }
-        break
-      }
-
-      case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data?.object
-        if (!paymentIntent) break
-
-        const paymentIntentId = paymentIntent.id
-        const orderId = paymentIntent.metadata?.order_id
-
-        if (orderId) {
+      case 'checkout.session.async_payment_failed':
+      case 'checkout.session.expired': {
+        const session = event.data?.object
+        const orderId = Number.parseInt(session?.metadata?.order_id, 10)
+        if (orderId && session?.id) {
           await query(
-            `UPDATE orders SET status = 'failed' WHERE id = $1 AND status = 'pending'`,
-            [parseInt(orderId, 10)],
+            `UPDATE orders
+             SET status = $1
+             WHERE id = $2 AND stripe_session_id = $3 AND status = 'pending'`,
+            [event.type.endsWith('.expired') ? 'cancelled' : 'failed', orderId, session.id],
           )
         }
-        console.warn(`[stripe-webhook] Payment failed for intent ${paymentIntentId}.`)
         break
       }
 

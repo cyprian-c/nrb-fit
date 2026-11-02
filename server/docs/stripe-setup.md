@@ -44,11 +44,13 @@ CLIENT_URL=https://nrbfit.cyprian.services
 3. Click **Add endpoint**.
 4. Set Endpoint URL to:
    ```
-   https://nrbfit.cyprian.services/api/checkout/webhook
+   https://nrbfit.cyprian.services/api/webhooks/stripe
    ```
 5. Select events to listen for:
    - `checkout.session.completed`
-   - `payment_intent.payment_failed`
+   - `checkout.session.async_payment_succeeded`
+   - `checkout.session.async_payment_failed`
+   - `checkout.session.expired`
 6. Click **Add endpoint** and copy the **Signing secret** (`whsec_...`).
 7. Paste this secret into your production `STRIPE_WEBHOOK_SECRET` environment variable.
 
@@ -63,7 +65,7 @@ To test webhooks locally using the Stripe CLI:
 npm run dev
 
 # 2. In another terminal, forward Stripe events to your local API
-stripe listen --forward-to localhost:5000/api/checkout/webhook
+stripe listen --forward-to localhost:5000/api/webhooks/stripe
 
 # 3. Trigger a test event or run the automated test suite
 npm --workspace=server run test:webhook

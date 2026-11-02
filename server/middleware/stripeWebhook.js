@@ -9,28 +9,20 @@ export function verifyStripeWebhook(req, res, next) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || STRIPE_WEBHOOK_SECRET
 
   if (!signature) {
-    // In development/test mode, allow simulated webhook calls without signing secret
-    if (process.env.NODE_ENV !== 'production' && req.body && req.body.type) {
-      req.stripeEvent = req.body
-      return next()
-    }
     return res.status(400).json({ error: 'Missing Stripe-Signature header.' })
   }
 
-  const rawPayload = req.rawBody || req.body
-
   if (!webhookSecret) {
     console.warn('[stripe] STRIPE_WEBHOOK_SECRET is not configured.')
-    // In dev, fall back to parsing json
-    if (process.env.NODE_ENV !== 'production' && req.body?.type) {
-      req.stripeEvent = req.body
-      return next()
-    }
     return res.status(500).json({ error: 'Stripe webhook secret is not configured on the server.' })
   }
 
+  if (!Buffer.isBuffer(req.rawBody)) {
+    return res.status(400).json({ error: 'Webhook request body is unavailable for signature verification.' })
+  }
+
   try {
-    const event = stripe.webhooks.constructEvent(rawPayload, signature, webhookSecret)
+    const event = stripe.webhooks.constructEvent(req.rawBody, signature, webhookSecret)
     req.stripeEvent = event
     next()
   } catch (err) {

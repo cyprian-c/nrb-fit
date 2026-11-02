@@ -16,6 +16,7 @@ import membershipRoutes from './routes/membershipRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import portalRoutes from './routes/portalRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
+import stripeWebhookRoutes from './routes/stripeWebhookRoutes.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -106,6 +107,7 @@ app.use('/api/memberships', membershipRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/portal', portalRoutes)
 app.use('/api/checkout', checkoutRoutes)
+app.use('/api/webhooks/stripe', stripeWebhookRoutes)
 
 // Serve frontend client dist in production if available (workspace build or public dir)
 const distCandidates = [
